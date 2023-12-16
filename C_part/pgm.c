@@ -127,23 +127,23 @@ void calculate_mandelbrot(netpbm_ptr img_ptr, const int max_iter) {
       }
 
       if (flag == 4) {
-        *pixel[0] = (char)255;
-        *pixel[1] = (char)255;
-        *pixel[2] = (char)255;
-        *pixel[3] = (char)255;
-        *pixel_symmetric[0] = (char)(255);
-        *pixel_symmetric[1] = (char)(255);
-        *pixel_symmetric[2] = (char)(255);
-        *pixel_symmetric[3] = (char)(255);
+        *pixel[0] = (char)MAX_COLOR;
+        *pixel[1] = (char)MAX_COLOR;
+        *pixel[2] = (char)MAX_COLOR;
+        *pixel[3] = (char)MAX_COLOR;
+        *pixel_symmetric[0] = (char)(MAX_COLOR);
+        *pixel_symmetric[1] = (char)(MAX_COLOR);
+        *pixel_symmetric[2] = (char)(MAX_COLOR);
+        *pixel_symmetric[3] = (char)(MAX_COLOR);
       } else {
         // Compute the normalized coordinates
         v4df mandelbrot_val = mandelbrot_point_calc(real, imag, max_iter);
 
         for (int i = 0; i < 4; i++) {
-          *pixel[i] =
-              mandelbrot_val[i] == max_iter
-                  ? (char)250
-                  : (char)(255 * log((double)mandelbrot_val[i]) / log_max_iter);
+          *pixel[i] = mandelbrot_val[i] == max_iter
+                          ? (char)MAX_COLOR
+                          : (char)(MAX_COLOR * log((double)mandelbrot_val[i]) /
+                                   log_max_iter);
           *pixel_symmetric[i] = *pixel[i];
         }
       }
@@ -164,17 +164,18 @@ void calculate_mandelbrot(netpbm_ptr img_ptr, const int max_iter) {
       char *pixel_symmetric = pixel_at(img_ptr, x, img_ptr->height - y - 1);
 
       // variable to check if inside bulb
-      double q = (real - 0.25) * (real - 0.25) + imag * imag;
-
       // is inside the bulb
+      // Link to the Wikimedia article
+      double q = (real - 0.25) * (real - 0.25) + imag * imag;
       if (q * (q + (real - 0.25)) <= 0.25 * imag * imag) {
-        *pixel = (char)255;
-        *pixel_symmetric = (char)(255);
+        *pixel = (char)MAX_COLOR;
+        *pixel_symmetric = (char)(MAX_COLOR);
       } else {
         int mandelbrot_val = mandelbrot_point_calc(real, imag, max_iter);
         *pixel = mandelbrot_val == max_iter
-                     ? (char)250
-                     : (char)(255 * log((double)mandelbrot_val) / log_max_iter);
+                     ? (char)MAX_COLOR
+                     : (char)(MAX_COLOR * log((double)mandelbrot_val) /
+                              log_max_iter);
 
         *pixel_symmetric = *pixel;
       }

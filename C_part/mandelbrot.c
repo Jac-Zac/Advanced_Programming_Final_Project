@@ -6,8 +6,8 @@
 #include "mandelbrot.h"
 
 #define RADIUS 2
-#define RADIUS_2 4
-#define PERIOD 100
+#define RADIUS_SQUARED 4
+#define PERIOD 1000
 
 // define macros if they help you look it up online
 
@@ -29,16 +29,16 @@ v4df mandelbrot_point_calc(v4df x0, v4df y0, const int max_iter) {
   int period = 0;
 
   for (unsigned int i = 0; i < max_iter; i++) {
-    if ((x2 + y2)[0] >= RADIUS_2 && (x2 + y2)[1] >= RADIUS_2 &&
-        (x2 + y2)[2] >= RADIUS_2 && (x2 + y2)[3] >= RADIUS_2) {
+    if ((x2 + y2)[0] >= RADIUS_SQUARED && (x2 + y2)[1] >= RADIUS_SQUARED &&
+        (x2 + y2)[2] >= RADIUS_SQUARED && (x2 + y2)[3] >= RADIUS_SQUARED) {
       return result;
     }
 
     // testing then I want to create a mask to add to the result
-    adding[0] = (x2 + y2)[0] < RADIUS_2;
-    adding[1] = (x2 + y2)[1] < RADIUS_2;
-    adding[2] = (x2 + y2)[2] < RADIUS_2;
-    adding[3] = (x2 + y2)[3] < RADIUS_2;
+    adding[0] = (x2 + y2)[0] < RADIUS_SQUARED;
+    adding[1] = (x2 + y2)[1] < RADIUS_SQUARED;
+    adding[2] = (x2 + y2)[2] < RADIUS_SQUARED;
+    adding[3] = (x2 + y2)[3] < RADIUS_SQUARED;
 
     y = 2 * x * y + y0;
     x = x2 - y2 + x0;
@@ -78,13 +78,10 @@ int mandelbrot_point_calc(double x0, double y0, const int max_iter) {
   // double complex z = c;
 
   // use the bailout method to keep in mind the derivative
-  //
-  // check if we have already been there for 1 cycles
-  //
   double x = 0.0;
   double y = 0.0;
-  double x2 = 0.0;
-  double y2 = 0.0;
+  double x_squared = 0.0;
+  double y_squared = 0.0;
 
   // periodicity checking
   int period = 0;
@@ -93,8 +90,9 @@ int mandelbrot_point_calc(double x0, double y0, const int max_iter) {
   //
   // implement the function iteratively
   for (unsigned int i = 0; i < max_iter; i++) {
+
     // check if radius distance is greater or equal to the radius
-    if ((x * x + y * y) >= RADIUS * RADIUS) {
+    if ((x_squared + y_squared) >= RADIUS_SQUARED) {
       // if ((cabs(z) >= radius)) {
       return i;
     }
@@ -103,24 +101,27 @@ int mandelbrot_point_calc(double x0, double y0, const int max_iter) {
     // double xtemp = x * x - y * y + x0;
     // y = 2 * x * y + y0;
     // x = xtemp;
-
+    //
+    // Find the position
     y = 2 * x * y + y0;
-    x = x2 - y2 + x0;
-    x2 = x * x;
-    y2 = y * y;
+    x = x_squared - y_squared + x0;
+
+    // update x_squared and y_squared for the next iteration
+    x_squared = x * x;
+    y_squared = y * y;
 
     // at each 100 periods if repeated exit
     // trade of memory for compute
     if ((old_position_real == x && old_position_imag == y)) {
-      return max_iter; // set to max for the color plotting
+      // set to max for the color plotting
+      return max_iter;
     }
 
-    period += 1;
-    if (period == PERIOD) {
+    if (period % PERIOD == 0) {
       old_position_real = x;
       old_position_imag = y;
-      period = 0;
     }
+    period += 1;
     // this obviously must be above the other
     // check every the old position is the same break
   }

@@ -9,6 +9,8 @@ Make mandelbrot the first file
 - Inside call mandelbrot_point or something
 - Mandelbot point sohuld be located in point_calculator
 
+calculateMandelbrotPoin
+
 # IMPORTANT
 
 ##### Not vectorized instructions:
