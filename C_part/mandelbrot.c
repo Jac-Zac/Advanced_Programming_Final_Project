@@ -7,7 +7,7 @@
 
 #define RADIUS 2
 #define RADIUS_2 4
-#define PERIOD 10000
+#define PERIOD 100
 
 // define macros if they help you look it up online
 
@@ -29,6 +29,11 @@ v4df mandelbrot_point_calc(v4df x0, v4df y0, const int max_iter) {
   int period = 0;
 
   for (unsigned int i = 0; i < max_iter; i++) {
+    if ((x2 + y2)[0] >= RADIUS_2 && (x2 + y2)[1] >= RADIUS_2 &&
+        (x2 + y2)[2] >= RADIUS_2 && (x2 + y2)[3] >= RADIUS_2) {
+      return result;
+    }
+
     // testing then I want to create a mask to add to the result
     adding[0] = (x2 + y2)[0] < RADIUS_2;
     adding[1] = (x2 + y2)[1] < RADIUS_2;
@@ -39,11 +44,6 @@ v4df mandelbrot_point_calc(v4df x0, v4df y0, const int max_iter) {
     x = x2 - y2 + x0;
     x2 = x * x;
     y2 = y * y;
-
-    if ((x2 + y2)[0] >= RADIUS_2 && (x2 + y2)[1] >= RADIUS_2 &&
-        (x2 + y2)[2] >= RADIUS_2 && (x2 + y2)[3] >= RADIUS_2) {
-      return result;
-    }
 
     old_position_check[0] =
         (old_position_real[0] == x[0]) && (old_position_imag[0] == y[0]);

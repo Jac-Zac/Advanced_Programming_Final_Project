@@ -2,6 +2,13 @@
 
 Blah blah
 
+Make mandelbrot the first file
+
+- Inside call the craete_mandelbrot function
+- Inside call uses pgm
+- Inside call mandelbrot_point or something
+- Mandelbot point sohuld be located in point_calculator
+
 # IMPORTANT
 
 ##### Not vectorized instructions:
