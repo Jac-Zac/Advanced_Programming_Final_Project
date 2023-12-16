@@ -150,14 +150,17 @@ void calculate_mandelbrot(netpbm_ptr img_ptr, const int max_iter) {
     }
   }
 #else
-#pragma omp parallel for schedule(dynamic) // Improved workload
   // distribution
+  double y_normalization = 2.0 / ((double)img_ptr->height - 1.0);
+  double x_normalization = 3.0 / ((double)img_ptr->width - 1.0);
+
+#pragma omp parallel for schedule(dynamic)
   for (int y = 0; y <= img_ptr->height / 2; y++) {
     // Compute the normalized coordinates
-    double imag = (2.0 * (double)y / ((double)img_ptr->height - 1.0)) -
-                  1.0; // Moved outside inner loop
+    // Moved outside inner loop
+    double imag = (y * y_normalization) - 1.0;
     for (int x = 0; x < img_ptr->width; x++) {
-      double real = (3.0 * (double)x / ((double)img_ptr->width - 1.0)) - 2.0;
+      double real = (x * x_normalization) - 2.0;
 
       // Compute the symmetric part together
       char *pixel = pixel_at(img_ptr, x, y);

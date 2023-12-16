@@ -5,9 +5,9 @@
 
 #include "mandelbrot.h"
 
-#define RADIUS 2
+// #define RADIUS 2
 #define RADIUS_SQUARED 4
-#define PERIOD 1000
+#define PERIOD 100
 
 // define macros if they help you look it up online
 
@@ -89,7 +89,8 @@ int mandelbrot_point_calc(double x0, double y0, const int max_iter) {
   double old_position_imag = 0.0;
   //
   // implement the function iteratively
-  for (unsigned int i = 0; i < max_iter; i++) {
+  unsigned int i = 0;
+  while (i < max_iter) {
 
     // check if radius distance is greater or equal to the radius
     if ((x_squared + y_squared) >= RADIUS_SQUARED) {
@@ -121,9 +122,10 @@ int mandelbrot_point_calc(double x0, double y0, const int max_iter) {
       old_position_real = x;
       old_position_imag = y;
     }
-    period += 1;
     // this obviously must be above the other
     // check every the old position is the same break
+    period++;
+    i++;
   }
   return max_iter;
 }
