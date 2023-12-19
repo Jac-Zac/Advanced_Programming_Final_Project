@@ -80,21 +80,22 @@ int create_image(const char *file_name, const int max_iter, const int n_rows) {
   }
 
   // Maybe in the future pass this
-  const double log_max_iter = log((double)max_iter);
+  const float log_max_iter = log((float)max_iter);
 
   // distribution
-  double y_normalization = 2.0 / ((double)image.height - 1.0);
-  double x_normalization = 3.0 / ((double)image.width - 1.0);
+  float y_normalization = 2.0 / ((float)image.height - 1.0);
+  float x_normalization = 3.0 / ((float)image.width - 1.0);
 
 #pragma omp parallel for schedule(dynamic)
   for (int y = 0; y <= image.height / 2; y++) {
     // Compute the normalized coordinates
-    double imag = (y * y_normalization) - 1.0;
+    float imag = (y * y_normalization) - 1.0;
     for (int x = 0; x < image.width; x++) {
-      double real = (x * x_normalization) - 2.0;
+      float real = (x * x_normalization) - 2.0;
 
       // Compute the symmetric part together
       char *pixel = pixel_at(&image, x, y);
+      // Wasting a bit of time hear
       char *pixel_symmetric = pixel_at(&image, x, image.height - y - 1);
 
       mandelbrot_point_calc(real, imag, pixel, pixel_symmetric, max_iter,
@@ -125,18 +126,18 @@ int close_image(netpbm_ptr img_ptr) {
   for (int y = 0; y <= img_ptr->height / 2; y += 4) {
     // Compute the normalized coordinates
     v4df imag = {
-        (2.0 * (double)y / ((double)img_ptr->height - 1.0)) - 1.0,
-        (2.0 * (double)(y + 1) / ((double)img_ptr->height - 1.0)) - 1.0,
-        (2.0 * (double)(y + 2) / ((double)img_ptr->height - 1.0)) - 1.0,
-        (2.0 * (double)(y + 3) / ((double)img_ptr->height - 1.0)) -
+        (2.0 * (float)y / ((float)img_ptr->height - 1.0)) - 1.0,
+        (2.0 * (float)(y + 1) / ((float)img_ptr->height - 1.0)) - 1.0,
+        (2.0 * (float)(y + 2) / ((float)img_ptr->height - 1.0)) - 1.0,
+        (2.0 * (float)(y + 3) / ((float)img_ptr->height - 1.0)) -
             1.0}; // Moved outside inner loop
     //
     for (int x = 0; x < img_ptr->width; x++) {
       v4df real = {
-          (3.0 * (double)x / ((double)img_ptr->width - 1.0)) - 2.0,
-          (3.0 * (double)x / ((double)img_ptr->width - 1.0)) - 2.0,
-          (3.0 * (double)x / ((double)img_ptr->width - 1.0)) - 2.0,
-          (3.0 * (double)x / ((double)img_ptr->width - 1.0)) - 2.0,
+          (3.0 * (float)x / ((float)img_ptr->width - 1.0)) - 2.0,
+          (3.0 * (float)x / ((float)img_ptr->width - 1.0)) - 2.0,
+          (3.0 * (float)x / ((float)img_ptr->width - 1.0)) - 2.0,
+          (3.0 * (float)x / ((float)img_ptr->width - 1.0)) - 2.0,
       };
 
       // Compute the symmetric part together
@@ -182,7 +183,7 @@ int close_image(netpbm_ptr img_ptr) {
       //       *pixel[i] = mandelbrot_val[i] == max_iter
       //                       ? (char)MAX_COLOR
       //                       : (char)(MAX_COLOR *
-      //                       log((double)mandelbrot_val[i]) /
+      //                       log((float)mandelbrot_val[i]) /
       //                                log_max_iter);
       //       *pixel_symmetric[i] = *pixel[i];
       //     }

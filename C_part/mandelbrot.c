@@ -8,11 +8,9 @@
 
 // define macros if they help you look it up online
 
-// double Mandelbrot_calculator(unite nm_iterations)
+// float Mandelbrot_calculator(unite nm_iterations)
 
 // Iterative implementation of mandelbrot_set -> less stack-frames
-//
-//
 
 #ifdef SIMD
 // v4df mandelbrot_point_calc(v4df x0, v4df y0, const int max_iter) {
@@ -71,46 +69,45 @@
 //   return result;
 // }
 #else
-void mandelbrot_point_calc(double x0, double y0, char *pixel,
+void mandelbrot_point_calc(float x0, float y0, char *pixel,
                            char *pixel_symmetric, const int max_iter,
-                           const int MAX_COLOR, const double log_max_iter) {
+                           const int MAX_COLOR, const float log_max_iter) {
   // variable to check if inside bulb
   // is inside the bulb
   // Link to the Wikimedia article
-  double q = (x0 - 0.25) * (x0 - 0.25) + y0 * y0;
+  float q = (x0 - 0.25) * (x0 - 0.25) + y0 * y0;
   if (q * (q + (x0 - 0.25)) <= 0.25 * y0 * y0) {
     *pixel = (char)MAX_COLOR;
     *pixel_symmetric = (char)(MAX_COLOR);
   } else {
 
     // This will be computed thanks to starting point perhaps two variables
-    // double complex c = x + y * i;
-    // double complex z = c;
+    // float complex c = x + y * i;
+    // float complex z = c;
 
     // use the bailout method to keep in mind the derivative
-    double x = 0.0;
-    double y = 0.0;
-    double x_squared = 0.0;
-    double y_squared = 0.0;
+    float x = 0.0;
+    float y = 0.0;
+    float x_squared = 0.0;
+    float y_squared = 0.0;
 
     // periodicity checking
     int period = 0;
-    double old_position_real = 0.0;
-    double old_position_imag = 0.0;
+    float old_position_real = 0.0;
+    float old_position_imag = 0.0;
     //
     // implement the function iteratively
     unsigned int i = 0;
     while (i < max_iter) {
       // check if radius distance is greater or equal to the radius
       if ((x_squared + y_squared) >= RADIUS_SQUARED) {
-        // if ((cabs(z) >= radius)) {
-        *pixel = (MAX_COLOR * log((double)i) / log_max_iter);
+        *pixel = (MAX_COLOR * log((float)i) / log_max_iter);
         *pixel_symmetric = *pixel;
         return;
       }
 
       // slow implementation
-      // double xtemp = x * x - y * y + x0;
+      // float xtemp = x * x - y * y + x0;
       // y = 2 * x * y + y0;
       // x = xtemp;
       //
@@ -132,6 +129,19 @@ void mandelbrot_point_calc(double x0, double y0, char *pixel,
         *pixel_symmetric = *pixel;
         return;
       }
+
+      // Make this branch less
+      // int check = (period % PERIOD == 0);
+      // // Prefetch the data that is likely to be accessed
+      // __builtin_prefetch(&x, 0, 3); // 0 for read, 3 for temporal locality
+      // __builtin_prefetch(&y, 0, 3);
+      // __builtin_prefetch(&old_position_real, 0,
+      //                    3); // 0 for read, 3 for temporal locality
+      // // old_position_real = x; is slowwww
+      // old_position_real = (check * x) + (1 - check) * old_position_real;
+      //
+      // __builtin_prefetch(&old_position_imag, 0, 3);
+      // old_position_imag = (check * y) + (1 - check) * old_position_imag;
 
       if (period % PERIOD == 0) {
         old_position_real = x;
