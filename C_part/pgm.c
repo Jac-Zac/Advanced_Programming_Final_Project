@@ -80,18 +80,53 @@ int create_image(const char *file_name, const int max_iter, const int n_rows) {
   }
 
   // Maybe in the future pass this
-  const float log_max_iter = log((float)max_iter);
+  const double log_max_iter = log((double)max_iter);
+
+#ifdef SIMD
+#pragma omp parallel for schedule(dynamic) // Improved workload
 
   // distribution
-  float y_normalization = 2.0 / ((float)image.height - 1.0);
-  float x_normalization = 3.0 / ((float)image.width - 1.0);
+  for (int y = 0; y <= image.height / 2; y += 4) {
+    // Compute the normalized coordinates
+    v4df imag = {(2.0 * (double)y / ((double)image.height - 1.0)) - 1.0,
+                 (2.0 * (double)(y + 1) / ((double)image.height - 1.0)) - 1.0,
+                 (2.0 * (double)(y + 2) / ((double)image.height - 1.0)) - 1.0,
+                 (2.0 * (double)(y + 3) / ((double)image.height - 1.0)) -
+                     1.0}; // Moved outside inner loop
+    //
+    for (int x = 0; x < image.width; x++) {
+      v4df real = {
+          (3.0 * (double)x / ((double)image.width - 1.0)) - 2.0,
+          (3.0 * (double)x / ((double)image.width - 1.0)) - 2.0,
+          (3.0 * (double)x / ((double)image.width - 1.0)) - 2.0,
+          (3.0 * (double)x / ((double)image.width - 1.0)) - 2.0,
+      };
+
+      // Compute the symmetric part together
+      char *pixel[4] = {pixel_at(&image, x, y), pixel_at(&image, x, y + 1),
+                        pixel_at(&image, x, y + 2), pixel_at(&image, x, y + 3)};
+
+      char *pixel_symmetric[4] = {pixel_at(&image, x, image.height - y - 1),
+                                  pixel_at(&image, x, image.height - y - 2),
+                                  pixel_at(&image, x, image.height - y - 3),
+                                  pixel_at(&image, x, image.height - y - 4)};
+
+      mandelbrot_point_calc(real, imag, pixel, pixel_symmetric, max_iter,
+                            MAX_COLOR, log_max_iter);
+    }
+  }
+#else
+
+  // distribution
+  double y_normalization = 2.0 / ((double)image.height - 1.0);
+  double x_normalization = 3.0 / ((double)image.width - 1.0);
 
 #pragma omp parallel for schedule(dynamic)
   for (int y = 0; y <= image.height / 2; y++) {
     // Compute the normalized coordinates
-    float imag = (y * y_normalization) - 1.0;
+    double imag = (y * y_normalization) - 1.0;
     for (int x = 0; x < image.width; x++) {
-      float real = (x * x_normalization) - 2.0;
+      double real = (x * x_normalization) - 2.0;
 
       // Compute the symmetric part together
       char *pixel = pixel_at(&image, x, y);
@@ -102,7 +137,7 @@ int create_image(const char *file_name, const int max_iter, const int n_rows) {
                             MAX_COLOR, log_max_iter);
     }
   }
-  // #endif
+#endif
   return close_image(&image);
 }
 
@@ -117,77 +152,3 @@ int close_image(netpbm_ptr img_ptr) {
   munmap(img_ptr->data, img_ptr->size);
   return fclose(img_ptr->fd);
 }
-
-/*
- * To add later
-#ifdef SIMD
-#pragma omp parallel for schedule(dynamic) // Improved workload
-  // distribution
-  for (int y = 0; y <= img_ptr->height / 2; y += 4) {
-    // Compute the normalized coordinates
-    v4df imag = {
-        (2.0 * (float)y / ((float)img_ptr->height - 1.0)) - 1.0,
-        (2.0 * (float)(y + 1) / ((float)img_ptr->height - 1.0)) - 1.0,
-        (2.0 * (float)(y + 2) / ((float)img_ptr->height - 1.0)) - 1.0,
-        (2.0 * (float)(y + 3) / ((float)img_ptr->height - 1.0)) -
-            1.0}; // Moved outside inner loop
-    //
-    for (int x = 0; x < img_ptr->width; x++) {
-      v4df real = {
-          (3.0 * (float)x / ((float)img_ptr->width - 1.0)) - 2.0,
-          (3.0 * (float)x / ((float)img_ptr->width - 1.0)) - 2.0,
-          (3.0 * (float)x / ((float)img_ptr->width - 1.0)) - 2.0,
-          (3.0 * (float)x / ((float)img_ptr->width - 1.0)) - 2.0,
-      };
-
-      // Compute the symmetric part together
-      char *pixel[4] = {pixel_at(img_ptr, x, y), pixel_at(img_ptr, x, y + 1),
-                        pixel_at(img_ptr, x, y + 2),
-                        pixel_at(img_ptr, x, y + 3)};
-
-      char *pixel_symmetric[4] = {
-          pixel_at(img_ptr, x, img_ptr->height - y - 1),
-          pixel_at(img_ptr, x, img_ptr->height - y - 2),
-          pixel_at(img_ptr, x, img_ptr->height - y - 3),
-          pixel_at(img_ptr, x, img_ptr->height - y - 4)};
-
-      // for every pixel
-      check_point()
-
-      //   int flag = 0;
-      //   // Check if the point is in the set
-      //   v4df q = (real - 0.25) * (real - 0.25) + imag * imag;
-      //   v4df mask = (q * (q + (real - 0.25)) <= 0.25 * imag * imag);
-      //
-      //   for (int i = 0; i < 4; i++) {
-      //     // is inside the bulb
-      //     if (mask[i]) {
-      //       flag += 1;
-      //     }
-      //   }
-      //
-      //   if (flag == 4) {
-      //     *pixel[0] = (char)MAX_COLOR;
-      //     *pixel[1] = (char)MAX_COLOR;
-      //     *pixel[2] = (char)MAX_COLOR;
-      //     *pixel[3] = (char)MAX_COLOR;
-      //     *pixel_symmetric[0] = (char)(MAX_COLOR);
-      //     *pixel_symmetric[1] = (char)(MAX_COLOR);
-      //     *pixel_symmetric[2] = (char)(MAX_COLOR);
-      //     *pixel_symmetric[3] = (char)(MAX_COLOR);
-      //   } else {
-      //     // Compute the normalized coordinates
-      //     v4df mandelbrot_val = mandelbrot_point_calc(real, imag, max_iter);
-      //
-      //     for (int i = 0; i < 4; i++) {
-      //       *pixel[i] = mandelbrot_val[i] == max_iter
-      //                       ? (char)MAX_COLOR
-      //                       : (char)(MAX_COLOR *
-      //                       log((float)mandelbrot_val[i]) /
-      //                                log_max_iter);
-      //       *pixel_symmetric[i] = *pixel[i];
-      //     }
-      //   }
-      // }
-#else
-*/
