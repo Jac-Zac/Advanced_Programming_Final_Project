@@ -4,8 +4,6 @@
 //
 #pragma once
 
-#include <stdio.h>
-
 struct _netpbm_image {
   int width;
   int height;
@@ -21,9 +19,6 @@ typedef struct _netpbm_image *netpbm_ptr;
 int set_image_info(netpbm_ptr img_ptr, const char *file_name, const int n_rows);
 
 int create_image(const char *file_name, const int max_iter, const int n_rows);
-
-// I do not like to have it hear
-void calculate_mandelbrot(netpbm_ptr img_ptr, const int max_iter);
 
 char *pixel_at(netpbm_ptr img_ptr, int x, int y);
 

@@ -1,4 +1,6 @@
 // Copyright (c) 2023 Jacopo Zacchigna. All Rights Reserved.
+
+#include <stdio.h>
 #include <stdlib.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -57,7 +59,7 @@ int set_image_info(netpbm_ptr img_ptr, const char *file_name,
 
   if (img_ptr->data == MAP_FAILED) {
     // USE THIS TO CLOSE
-    // close_image(img_ptr);
+    // close_image(img_ctr);
     fclose(img_ptr->fd);
     return -3;
   }
@@ -65,6 +67,8 @@ int set_image_info(netpbm_ptr img_ptr, const char *file_name,
   return 0;
 }
 
+// Perhaps pass the function you care about as a parameter and if the function
+// is the Mandelbrot set you can do it symmetric
 int create_image(const char *file_name, const int max_iter, const int n_rows) {
   netpbm image;
 
@@ -75,14 +79,46 @@ int create_image(const char *file_name, const int max_iter, const int n_rows) {
     return err;
   }
 
-  calculate_mandelbrot(&image, max_iter);
+  // Maybe in the future pass this
+  const double log_max_iter = log((double)max_iter);
 
+  // distribution
+  double y_normalization = 2.0 / ((double)image.height - 1.0);
+  double x_normalization = 3.0 / ((double)image.width - 1.0);
+
+#pragma omp parallel for schedule(dynamic)
+  for (int y = 0; y <= image.height / 2; y++) {
+    // Compute the normalized coordinates
+    double imag = (y * y_normalization) - 1.0;
+    for (int x = 0; x < image.width; x++) {
+      double real = (x * x_normalization) - 2.0;
+
+      // Compute the symmetric part together
+      char *pixel = pixel_at(&image, x, y);
+      char *pixel_symmetric = pixel_at(&image, x, image.height - y - 1);
+
+      mandelbrot_point_calc(real, imag, pixel, pixel_symmetric, max_iter,
+                            MAX_COLOR, log_max_iter);
+    }
+  }
+  // #endif
   return close_image(&image);
 }
 
-void calculate_mandelbrot(netpbm_ptr img_ptr, const int max_iter) {
-  const double log_max_iter = log((double)max_iter);
+char *pixel_at(netpbm_ptr img_ptr, int x, int y) {
+  if ((x < 0 || x > img_ptr->width) || (y < 0 || y > img_ptr->height)) {
+    return NULL;
+  }
+  return &img_ptr->data[y * img_ptr->width + x + img_ptr->offset];
+}
 
+int close_image(netpbm_ptr img_ptr) {
+  munmap(img_ptr->data, img_ptr->size);
+  return fclose(img_ptr->fd);
+}
+
+/*
+ * To add later
 #ifdef SIMD
 #pragma omp parallel for schedule(dynamic) // Improved workload
   // distribution
@@ -114,87 +150,43 @@ void calculate_mandelbrot(netpbm_ptr img_ptr, const int max_iter) {
           pixel_at(img_ptr, x, img_ptr->height - y - 3),
           pixel_at(img_ptr, x, img_ptr->height - y - 4)};
 
-      int flag = 0;
-      // Check if the point is in the set
-      v4df q = (real - 0.25) * (real - 0.25) + imag * imag;
-      v4df mask = (q * (q + (real - 0.25)) <= 0.25 * imag * imag);
+      // for every pixel
+      check_point()
 
-      for (int i = 0; i < 4; i++) {
-        // is inside the bulb
-        if (mask[i]) {
-          flag += 1;
-        }
-      }
-
-      if (flag == 4) {
-        *pixel[0] = (char)MAX_COLOR;
-        *pixel[1] = (char)MAX_COLOR;
-        *pixel[2] = (char)MAX_COLOR;
-        *pixel[3] = (char)MAX_COLOR;
-        *pixel_symmetric[0] = (char)(MAX_COLOR);
-        *pixel_symmetric[1] = (char)(MAX_COLOR);
-        *pixel_symmetric[2] = (char)(MAX_COLOR);
-        *pixel_symmetric[3] = (char)(MAX_COLOR);
-      } else {
-        // Compute the normalized coordinates
-        v4df mandelbrot_val = mandelbrot_point_calc(real, imag, max_iter);
-
-        for (int i = 0; i < 4; i++) {
-          *pixel[i] = mandelbrot_val[i] == max_iter
-                          ? (char)MAX_COLOR
-                          : (char)(MAX_COLOR * log((double)mandelbrot_val[i]) /
-                                   log_max_iter);
-          *pixel_symmetric[i] = *pixel[i];
-        }
-      }
-    }
-  }
+      //   int flag = 0;
+      //   // Check if the point is in the set
+      //   v4df q = (real - 0.25) * (real - 0.25) + imag * imag;
+      //   v4df mask = (q * (q + (real - 0.25)) <= 0.25 * imag * imag);
+      //
+      //   for (int i = 0; i < 4; i++) {
+      //     // is inside the bulb
+      //     if (mask[i]) {
+      //       flag += 1;
+      //     }
+      //   }
+      //
+      //   if (flag == 4) {
+      //     *pixel[0] = (char)MAX_COLOR;
+      //     *pixel[1] = (char)MAX_COLOR;
+      //     *pixel[2] = (char)MAX_COLOR;
+      //     *pixel[3] = (char)MAX_COLOR;
+      //     *pixel_symmetric[0] = (char)(MAX_COLOR);
+      //     *pixel_symmetric[1] = (char)(MAX_COLOR);
+      //     *pixel_symmetric[2] = (char)(MAX_COLOR);
+      //     *pixel_symmetric[3] = (char)(MAX_COLOR);
+      //   } else {
+      //     // Compute the normalized coordinates
+      //     v4df mandelbrot_val = mandelbrot_point_calc(real, imag, max_iter);
+      //
+      //     for (int i = 0; i < 4; i++) {
+      //       *pixel[i] = mandelbrot_val[i] == max_iter
+      //                       ? (char)MAX_COLOR
+      //                       : (char)(MAX_COLOR *
+      //                       log((double)mandelbrot_val[i]) /
+      //                                log_max_iter);
+      //       *pixel_symmetric[i] = *pixel[i];
+      //     }
+      //   }
+      // }
 #else
-  // distribution
-  double y_normalization = 2.0 / ((double)img_ptr->height - 1.0);
-  double x_normalization = 3.0 / ((double)img_ptr->width - 1.0);
-
-#pragma omp parallel for schedule(dynamic)
-  for (int y = 0; y <= img_ptr->height / 2; y++) {
-    // Compute the normalized coordinates
-    // Moved outside inner loop
-    double imag = (y * y_normalization) - 1.0;
-    for (int x = 0; x < img_ptr->width; x++) {
-      double real = (x * x_normalization) - 2.0;
-
-      // Compute the symmetric part together
-      char *pixel = pixel_at(img_ptr, x, y);
-      char *pixel_symmetric = pixel_at(img_ptr, x, img_ptr->height - y - 1);
-
-      // variable to check if inside bulb
-      // is inside the bulb
-      // Link to the Wikimedia article
-      double q = (real - 0.25) * (real - 0.25) + imag * imag;
-      if (q * (q + (real - 0.25)) <= 0.25 * imag * imag) {
-        *pixel = (char)MAX_COLOR;
-        *pixel_symmetric = (char)(MAX_COLOR);
-      } else {
-        int mandelbrot_val = mandelbrot_point_calc(real, imag, max_iter);
-        *pixel = mandelbrot_val == max_iter
-                     ? (char)MAX_COLOR
-                     : (char)(MAX_COLOR * log((double)mandelbrot_val) /
-                              log_max_iter);
-
-        *pixel_symmetric = *pixel;
-      }
-    }
-  }
-#endif
-}
-
-char *pixel_at(netpbm_ptr img_ptr, int x, int y) {
-  if ((x < 0 || x > img_ptr->width) || (y < 0 || y > img_ptr->height)) {
-    return NULL;
-  }
-  return &img_ptr->data[y * img_ptr->width + x + img_ptr->offset];
-}
-
-int close_image(netpbm_ptr img_ptr) {
-  munmap(img_ptr->data, img_ptr->size);
-  return fclose(img_ptr->fd);
-}
+*/
