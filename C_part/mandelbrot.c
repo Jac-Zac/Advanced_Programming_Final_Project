@@ -50,7 +50,6 @@ void mandelbrot_point_calc(v4df x0, v4df y0, char **pixel,
     v4df adding = {1.0, 1.0, 1.0, 1.0};
     v4df old_position_real = {0.0, 0.0, 0.0, 0.0};
     v4df old_position_imag = {0.0, 0.0, 0.0, 0.0};
-    v4df old_position_check = {0.0, 0.0, 0.0, 0.0};
     int period = 0;
 
     int i = 0;
@@ -75,17 +74,10 @@ void mandelbrot_point_calc(v4df x0, v4df y0, char **pixel,
       x2 = x * x;
       y2 = y * y;
 
-      old_position_check[0] =
-          (old_position_real[0] == x[0]) && (old_position_imag[0] == y[0]);
-      old_position_check[1] =
-          (old_position_real[1] == x[1]) && (old_position_imag[1] == y[1]);
-      old_position_check[2] =
-          (old_position_real[2] == x[2]) && (old_position_imag[2] == y[2]);
-      old_position_check[3] =
-          (old_position_real[3] == x[3]) && (old_position_imag[3] == y[3]);
-
-      if ((old_position_check[0] == 1.0) && (old_position_check[1] == 1.0) &&
-          (old_position_check[2] == 1.0) && (old_position_check[3] == 1.0)) {
+      if (((old_position_real[0] == x[0]) && (old_position_imag[0] == y[0])) &&
+          ((old_position_real[1] == x[1]) && (old_position_imag[1] == y[1])) &&
+          ((old_position_real[2] == x[2]) && (old_position_imag[2] == y[2])) &&
+          ((old_position_real[3] == x[3]) && (old_position_imag[3] == y[3]))) {
         for (int j = 0; j < 4; j++) {
           *pixel[j] = (char)MAX_COLOR;
           *pixel_symmetric[j] = *pixel[j];

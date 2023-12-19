@@ -1,56 +1,16 @@
-# Project ..
+# Project C_part
 
-Blah blah
+# TODO
 
-Make mandelbrot the first file
+- Fix paralelism
 
-- Inside call the craete_mandelbrot function
-- Inside call uses pgm
-- Inside call mandelbrot_point or something
-- Mandelbot point sohuld be located in point_calculator
-
-calculateMandelbrotPoin
-
-# IMPORTANT
-
-##### Not vectorized instructions:
-
-Time taken: 25684.260000 ms
-
-#### Equations:
-
-I might want to reuse those
-
-q ∗ (q + (z[0] − 0.25)) < z[1]2 ∗ 0.25, where q = (z[0] − 0.25)2 + z[1]2 (4.1)
-z[0]2 + (2 ∗ z[0]) + 1 + z[1]2 < 0.0625
-
-- unlikely -> Very helpfull instead of just checking the value in the mandelbrot set
-
-How I visualize it:
+### How I visualize it:
 
 ```bash
 ./main test.pgm 5000 1000 && icat test.pgm
 ```
 
-- Create a # define COLOR
-
-> which makes the code colored instead of back and white
-
-- Need to add SIMD
-
-Exploit the symmetry of the set to half computation time
-
 It should compute pixel 0, 0 and automatically copy that to the pixcel at -1 0 or something
-
-Perhpas use memoization -> also think about the fact that things are recomputed
-
-precompiled header https://www.youtube.com/results?search_query=precompiled+header+
-
-Maybe to see: https://www.youtube.com/watch?v=rVQMaiz0ydk
-
-Maybe use a stack to keep track of the previous values computed
-
-Also If you want your custom implementation of complex to use simd
 
 Example code
 
