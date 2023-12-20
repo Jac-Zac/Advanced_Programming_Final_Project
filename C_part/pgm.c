@@ -29,37 +29,26 @@ int set_image_info(netpbm_ptr img_ptr, const char *file_name,
   img_ptr->width = n_rows * 1.5;
 
   // Write to the newly created file
-  // Maube do also this part with mmmap
-  fprintf(img_ptr->fd, "P5\n%d %d\n255\n", img_ptr->width, img_ptr->height);
+  // Maybe do also this part with mmap
+  int header_size =
+      fprintf(img_ptr->fd, "P5\n%d %d\n255\n", img_ptr->width, img_ptr->height);
 
-  // IMPORTANT
-  // Flush the file to ensure all data is written
-  // fflush(img_ptr->fd);
-  //
-  int fdnum = fileno(img_ptr->fd);
-
-  // from my current position save the offset
-  img_ptr->offset = ftell(img_ptr->fd);
+  img_ptr->offset = header_size;
 
   // Compute the size
   img_ptr->size = img_ptr->width * img_ptr->height + img_ptr->offset;
-  // img_ptr->size = img_ptr->width * img_ptr->height;
 
   // Extend the file size to the desired size
-  if (ftruncate(fdnum, img_ptr->size) == -1) {
+  if (ftruncate(fileno(file->fd), img_ptr->size) == -1) {
     perror("Failed to extend the file size");
     fclose(img_ptr->fd);
     return -1;
   }
 
-  // mapping the file to the ...
-  // size + 1000 just an hacky way to do it
   img_ptr->data = mmap((void *)0, img_ptr->size, PROT_READ | PROT_WRITE,
                        MAP_SHARED, fileno(img_ptr->fd), 0);
 
   if (img_ptr->data == MAP_FAILED) {
-    // USE THIS TO CLOSE
-    // close_image(img_ctr);
     fclose(img_ptr->fd);
     return -3;
   }
@@ -178,41 +167,6 @@ int create_image(const char *file_name, const int max_iter, const int n_rows) {
 #endif
   return close_image(&image);
 }
-
-// int open_image(char * path, netpbm_ptr img)
-// {
-//   img->fd = fopen(path, "r+");
-//   if (img->fd == NULL) {
-//     return -1;
-//   }
-//   struct stat sbuf;
-//   stat(path, &sbuf);
-//   img->size = sbuf.st_size;
-//   if (fscanf(img->fd, "P5\n%d %d\n255\n", &img->width, &img->height) != 2)
-//   {
-//     fclose(img->fd);
-//     return -2;
-//   }
-//   img->offset = ftell(img->fd);
-//   img->data = mmap((void *)0, img->size, PROT_READ | PROT_WRITE,
-//   MAP_SHARED, fileno(img->fd), 0); if (img->data == MAP_FAILED) {
-//     fclose(img->fd);
-//     return -3;
-//   }
-//   return 0;
-// }
-
-// int empty_image(char * path, netpbm_ptr img, int width, int height)
-// {
-//   FILE * fd = fopen(path, "w+");
-//   if (fd == NULL) {
-//     return -1;
-//   }
-//   int written = fprintf(fd, "P5\n%d %d\n255\n", width, height);
-//   ftruncate(fileno(fd), written + width * height);
-//   fclose(fd);
-//   return open_image(path, img);
-// }
 
 char *pixel_at(netpbm_ptr img_ptr, int x, int y) {
   if (img_ptr == NULL) {
