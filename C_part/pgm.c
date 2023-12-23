@@ -39,7 +39,7 @@ int set_image_info(netpbm_ptr img_ptr, const char *file_name,
   img_ptr->size = img_ptr->width * img_ptr->height + img_ptr->offset;
 
   // Extend the file size to the desired size
-  if (ftruncate(fileno(file->fd), img_ptr->size) == -1) {
+  if (ftruncate(fileno(img_ptr->fd), img_ptr->size) == -1) {
     perror("Failed to extend the file size");
     fclose(img_ptr->fd);
     return -1;
@@ -137,6 +137,30 @@ int create_image(const char *file_name, const int max_iter, const int n_rows) {
 
       mandelbrot_point_calc(real, imag, pixel, pixel_symmetric, max_iter,
                             MAX_COLOR, log_max_iter);
+    }
+  }
+
+#elif __ARM_NEON
+  // distribution
+  float y_normalization = 2.0 / ((float)image.height - 1.0);
+  float x_normalization = 3.0 / ((float)image.width - 1.0);
+
+#pragma omp parallel for schedule(dynamic)
+  for (int y = 0; y <= image.height / 2; y++) {
+    // Compute the normalized coordinates
+    float imag = (y * y_normalization) - 1.0;
+    for (int x = 0; x < image.width; x++) {
+      float real = (x * x_normalization) - 2.0;
+
+      // Compute the symmetric part together
+      char *pixel = pixel_at(&image, x, y);
+      // Wasting a bit of time hear
+      char *pixel_symmetric = pixel_at(&image, x, image.height - y - 1);
+
+      int mandelbrot_val = mandelbrot_point_calc(real, imag, max_iter);
+
+      *pixel = MAX_COLOR * log((float)mandelbrot_val) / log_max_iter;
+      *pixel_symmetric = *pixel;
     }
   }
 
