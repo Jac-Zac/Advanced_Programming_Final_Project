@@ -29,7 +29,7 @@ int set_image_info(netpbm_ptr img_ptr, const char *file_name,
   img_ptr->width = n_rows * 1.5;
 
   // Write to the newly created file
-  // Maybe do also this part with mmap
+  // Maybe do also this part with map
   int header_size =
       fprintf(img_ptr->fd, "P5\n%d %d\n255\n", img_ptr->width, img_ptr->height);
 
@@ -73,99 +73,89 @@ int create_image(const char *file_name, const int max_iter, const int n_rows) {
 
 #ifdef SIMD
 #pragma omp parallel for schedule(dynamic) // Improved workload
+  for (int y = 0; y <= image.height / 2; y += 8) {
+    v8df imag = {
+        (2.0 * (double)y / ((double)image.height - 1.0)) - 1.0,
+        (2.0 * (double)(y + 1) / ((double)image.height - 1.0)) - 1.0,
+        (2.0 * (double)(y + 2) / ((double)image.height - 1.0)) - 1.0,
+        (2.0 * (double)(y + 3) / ((double)image.height - 1.0)) - 1.0,
+        (2.0 * (double)(y + 4) / ((double)image.height - 1.0)) - 1.0,
+        (2.0 * (double)(y + 5) / ((double)image.height - 1.0)) - 1.0,
+        (2.0 * (double)(y + 6) / ((double)image.height - 1.0)) - 1.0,
+        (2.0 * (double)(y + 7) / ((double)image.height - 1.0)) - 1.0,
+    }; // Moved outside inner loop
 
-  // // distribution
-  // // for (int y = 0; y <= image.height / 2; y++) {
-  // for (int y = 0; y <= image.height / 2; y++) {
-  //   // Compute the normalized coordinates
-  //   v4df imag;
-  //   for (int j = 0; j < 8; j++) {
-  //     imag[j] = (2.0 * (float)(y + j) / ((float)image.height - 1.0)) - 1.0;
-  //   }
-  //
-  //   // Inner loop
-  //   for (int x = 0; x < image.width; x += 8) {
-  //     // storing real part
-  //     v4df real;
-  //     for (int j = 0; j < 8; j++) {
-  //       real[j] = (3.0 * (float)(x + j) / ((float)image.width - 1.0)) - 2.0;
-  //     }
-  //
-  //     if (x + 8 > image.width) {
-  //       // Handle the case where x + 8 is greater than image.width
-  //       // This is where you should compute the pixels without using the SIMD
-  //       // version
-  //       // Compute the symmetric part together
-  //     } else {
-  //       char *pixel[8]; // Declare pixel as an array of 8 char elements
-  //       char *pixel_symmetric[8];
-  //       for (int j = 0; j < 8; j++) {
-  //         pixel[j] = pixel_at(&image, x, y + j);
-  //         pixel_symmetric[j] = pixel_at(&image, x, image.height - y - (1 +
-  //         j)); if (pixel[j] == NULL) {
-  //           printf("Error at x = %d y = %d\n", x, y);
-  //         }
-  //       }
-  //
-  //       mandelbrot_point_calc(real, imag, pixel, pixel_symmetric, max_iter,
-  //                             MAX_COLOR, log_max_iter);
-  //     }
-  //   }
-  // }
+    for (int x = 0; x < image.width; x++) {
+      v8df real = {
+          (3.0 * (double)x / ((double)image.width - 1.0)) - 2.0,
+          (3.0 * (double)x / ((double)image.width - 1.0)) - 2.0,
+          (3.0 * (double)x / ((double)image.width - 1.0)) - 2.0,
+          (3.0 * (double)x / ((double)image.width - 1.0)) - 2.0,
+          (3.0 * (double)x / ((double)image.width - 1.0)) - 2.0,
+          (3.0 * (double)x / ((double)image.width - 1.0)) - 2.0,
+          (3.0 * (double)x / ((double)image.width - 1.0)) - 2.0,
+          (3.0 * (double)x / ((double)image.width - 1.0)) - 2.0,
+      };
 
-  for (int y = 0; y <= image.height / 2; y++) {
-    v4df imag;
-    for (int j = 0; j < 8; j++) {
-      imag[j] = (2.0 * (float)(y + j) / ((float)image.height - 1.0)) - 1.0;
-    }
+      // Compute the symmetric part together
+      char *pixel[8] = {pixel_at(&image, x, y),     pixel_at(&image, x, y + 1),
+                        pixel_at(&image, x, y + 2), pixel_at(&image, x, y + 3),
+                        pixel_at(&image, x, y + 4), pixel_at(&image, x, y + 5),
+                        pixel_at(&image, x, y + 6), pixel_at(&image, x, y + 7)};
 
-    for (int x = 0; x < image.width; x += 8) {
-      v4df real;
+      char *pixel_symmetric[8] = {pixel_at(&image, x, image.height - y - 1),
+                                  pixel_at(&image, x, image.height - y - 2),
+                                  pixel_at(&image, x, image.height - y - 3),
+                                  pixel_at(&image, x, image.height - y - 4),
+                                  pixel_at(&image, x, image.height - y - 5),
+                                  pixel_at(&image, x, image.height - y - 6),
+                                  pixel_at(&image, x, image.height - y - 7),
+                                  pixel_at(&image, x, image.height - y - 8)};
+
+      v8df mandelbrot_val = mandelbrot_point_calc(real, imag, max_iter);
+
       for (int j = 0; j < 8; j++) {
-        real[j] = (3.0 * (float)(x + j) / ((float)image.width - 1.0)) - 2.0;
+        *pixel[j] = MAX_COLOR * (log((float)mandelbrot_val[j]) / log_max_iter);
+        *pixel_symmetric[j] = *pixel[j];
       }
-
-      char *pixel[8];
-      char *pixel_symmetric[8];
-      for (int j = 0; j < 8; j++) {
-        pixel[j] = pixel_at(&image, x, y + j);
-        pixel_symmetric[j] = pixel_at(&image, x, image.height - y - (1 + j));
-        if (pixel[j] == NULL) {
-          printf("Error at x = %d y = %d\n", x, y);
-        }
-      }
-
-      mandelbrot_point_calc(real, imag, pixel, pixel_symmetric, max_iter,
-                            MAX_COLOR, log_max_iter);
     }
   }
 
 #elif __ARM_NEON
-  // distribution
-  float y_normalization = 2.0 / ((float)image.height - 1.0);
-  float x_normalization = 3.0 / ((float)image.width - 1.0);
+#pragma omp parallel for schedule(dynamic) // Improved workload
+  for (int y = 0; y <= image.height / 2; y += 4) {
+    float32x4_t imag = {
+        (2.0 * (double)y / ((double)image.height - 1.0)) - 1.0,
+        (2.0 * (double)(y + 1) / ((double)image.height - 1.0)) - 1.0,
+        (2.0 * (double)(y + 2) / ((double)image.height - 1.0)) - 1.0,
+        (2.0 * (double)(y + 3) / ((double)image.height - 1.0)) - 1.0};
 
-#pragma omp parallel for schedule(dynamic)
-  for (int y = 0; y <= image.height / 2; y++) {
-    // Compute the normalized coordinates
-    float imag = (y * y_normalization) - 1.0;
-    for (int x = 0; x < image.width; x++) {
-      float real = (x * x_normalization) - 2.0;
+    for (int x = 0; x < image.width; x += 4) {
+      float32x4_t real = {(3.0 * (double)x / ((double)image.width - 1.0)) - 2.0,
+                          (3.0 * (double)x / ((double)image.width - 1.0)) - 2.0,
+                          (3.0 * (double)x / ((double)image.width - 1.0)) - 2.0,
+                          (3.0 * (double)x / ((double)image.width - 1.0)) -
+                              2.0};
 
       // Compute the symmetric part together
-      char *pixel = pixel_at(&image, x, y);
-      // Wasting a bit of time hear
-      char *pixel_symmetric = pixel_at(&image, x, image.height - y - 1);
+      char *pixel[4] = {pixel_at(&image, x, y), pixel_at(&image, x, y + 1),
+                        pixel_at(&image, x, y + 2), pixel_at(&image, x, y + 3)};
 
-      int mandelbrot_val = mandelbrot_point_calc(real, imag, max_iter);
+      char *pixel_symmetric[4] = {pixel_at(&image, x, image.height - y - 1),
+                                  pixel_at(&image, x, image.height - y - 2),
+                                  pixel_at(&image, x, image.height - y - 3),
+                                  pixel_at(&image, x, image.height - y - 4)};
 
-      *pixel = MAX_COLOR * log((float)mandelbrot_val) / log_max_iter;
-      *pixel_symmetric = *pixel;
+      float32x4_t mandelbrot_val = mandelbrot_point_calc(real, imag, max_iter);
+
+      for (int j = 0; j < 4; j++) {
+        *pixel[j] = MAX_COLOR * (log((float)mandelbrot_val[j]) / log_max_iter);
+        *pixel_symmetric[j] = *pixel[j];
+      }
     }
   }
 
 #else
-
   // distribution
   float y_normalization = 2.0 / ((float)image.height - 1.0);
   float x_normalization = 3.0 / ((float)image.width - 1.0);
