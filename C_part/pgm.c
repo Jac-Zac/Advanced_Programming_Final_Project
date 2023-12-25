@@ -122,6 +122,7 @@ int create_image(const char *file_name, const int max_iter, const int n_rows) {
   }
 
 #elif __ARM_NEON
+#define NUM_PIXELS 4
 #pragma omp parallel for schedule(dynamic) // Improved workload
   for (int y = 0; y <= image.height / 2; y += 4) {
     float32x4_t imag = {
@@ -130,25 +131,24 @@ int create_image(const char *file_name, const int max_iter, const int n_rows) {
         (2.0 * (double)(y + 2) / ((double)image.height - 1.0)) - 1.0,
         (2.0 * (double)(y + 3) / ((double)image.height - 1.0)) - 1.0};
 
-    for (int x = 0; x < image.width; x += 4) {
-      float32x4_t real = {(3.0 * (double)x / ((double)image.width - 1.0)) - 2.0,
-                          (3.0 * (double)x / ((double)image.width - 1.0)) - 2.0,
-                          (3.0 * (double)x / ((double)image.width - 1.0)) - 2.0,
-                          (3.0 * (double)x / ((double)image.width - 1.0)) -
-                              2.0};
+    for (int x = 0; x < image.width; x++) {
+      float reals = (3.0 * (double)x / ((double)image.width - 1.0)) - 2.0;
+      float32x4_t real = vld1q_dup_f32(&reals);
 
       // Compute the symmetric part together
-      char *pixel[4] = {pixel_at(&image, x, y), pixel_at(&image, x, y + 1),
-                        pixel_at(&image, x, y + 2), pixel_at(&image, x, y + 3)};
+      char *pixel[NUM_PIXELS] = {
+          pixel_at(&image, x, y), pixel_at(&image, x, y + 1),
+          pixel_at(&image, x, y + 2), pixel_at(&image, x, y + 3)};
 
-      char *pixel_symmetric[4] = {pixel_at(&image, x, image.height - y - 1),
-                                  pixel_at(&image, x, image.height - y - 2),
-                                  pixel_at(&image, x, image.height - y - 3),
-                                  pixel_at(&image, x, image.height - y - 4)};
+      char *pixel_symmetric[NUM_PIXELS] = {
+          pixel_at(&image, x, image.height - y - 1),
+          pixel_at(&image, x, image.height - y - 2),
+          pixel_at(&image, x, image.height - y - 3),
+          pixel_at(&image, x, image.height - y - 4)};
 
       float32x4_t mandelbrot_val = mandelbrot_point_calc(real, imag, max_iter);
 
-      for (int j = 0; j < 4; j++) {
+      for (int j = 0; j < NUM_PIXELS; j++) {
         *pixel[j] = MAX_COLOR * (log((float)mandelbrot_val[j]) / log_max_iter);
         *pixel_symmetric[j] = *pixel[j];
       }
