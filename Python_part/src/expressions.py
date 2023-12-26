@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List
 
-from stack import Stack
+from src.my_stack import Stack
 
 
 class Expression(ABC):

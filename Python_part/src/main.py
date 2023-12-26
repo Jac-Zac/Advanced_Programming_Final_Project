@@ -21,7 +21,6 @@ if __name__ == "__main__":
 
 
 # Output attest:
-# (1/ (+ (1/ y) (** 2 (abs (/ (- 5 6) (* x (+ 3 2)))))))
 # 0.84022932953024
 
 # YOU can add a method compile to compile into C code that can then be runned

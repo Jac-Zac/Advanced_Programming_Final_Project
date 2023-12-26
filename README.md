@@ -14,4 +14,12 @@ It should compute pixel 0, 0 and automatically copy that to the pixcel at -1 0 o
 
 Didn't use complex numbers so that I can then use them reuse the code for the vectorized version
 
-Example code
+### Python part:
+
+Install dependencies
+
+You can run the tests by:
+
+```bash
+pytest
+```

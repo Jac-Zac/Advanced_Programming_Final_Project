@@ -1,28 +1,29 @@
 import sys
-import unittest
 
 sys.path.append("../")
 
 from src.expressions import *
+from src.my_stack import Stack
 
 
-class TestExpressions(unittest.TestCase):
-    def test_expression_evaluation(self):
-        d = {
-            "+": Addition,
-            "*": Multiplication,
-            "**": Power,
-            "-": Subtraction,
-            "/": Division,
-            "1/": Reciprocal,
-            "abs": AbsoluteValue,
-        }
-        example = "2 3 + x * 6 5 - / abs 2 ** y 1/ + 1/"
-        expression = Expression.from_program(example, d)
-        result = expression.evaluate({"x": 3, "y": 7})
-        expected_result = 0.84022932953024
-        self.assertAlmostEqual(result, expected_result, places=5)
+def test_expression_evaluation():
+    d = {
+        "+": Addition,
+        "*": Multiplication,
+        "**": Power,
+        "-": Subtraction,
+        "/": Division,
+        "1/": Reciprocal,
+        "abs": AbsoluteValue,
+    }
+    example = "2 3 + x * 6 5 - / abs 2 ** y 1/ + 1/"
+    expression = Expression.from_program(example, d)
+    expected_str = "(1/ (+ (1/ y) (** 2 (abs (/ (- 5 6) (* x (+ 3 2)))))))"
 
+    assert str(expression) == expected_str
 
-if __name__ == "__main__":
-    unittest.main()
+    result = expression.evaluate({"x": 3, "y": 7})
+    expected_result = 0.84022932953024
+    assert (
+        abs(result - expected_result) < 1e-5
+    )  # Equivalent to almostEqual with 5 decimal places
