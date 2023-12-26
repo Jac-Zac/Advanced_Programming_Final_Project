@@ -27,13 +27,13 @@ int main(int argc, char *argv[]) {
   double end = omp_get_wtime();
 
   if (error != 0) {
-    printf("Erorr: %d", error);
+    printf("Error: %d", error);
   }
 
   double ms = (end - start) * 1000;
 
 #ifdef SIMD
-  printf("\033[1;31mUsing Neon version\n\033[0m"); // Green color
+  printf("\033[1;31mUsing Neon version\n\033[0m"); // Red color
 #else
   printf("\033[1;32mUsing default version\n\033[0m"); // Green color
 #endif

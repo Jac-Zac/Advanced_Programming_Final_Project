@@ -1,5 +1,4 @@
 // Copyright (c) 2023 Jacopo Zacchigna. All Rights Reserved.
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/mman.h>
@@ -72,15 +71,19 @@ int create_image(const char *file_name, const int max_iter, const int n_rows) {
   const float log_max_iter = log((float)max_iter);
 
 #ifdef SIMD
-// #elif __ARM_NEON
 #define NUM_PIXELS 4
+
+  // Ensure alignment for SIMD operations using GCC/Clang specific attribute
+  float imag_values[NUM_PIXELS] __attribute__((aligned(16)));
+
+// #elif __ARM_NEON
 #pragma omp parallel for schedule(dynamic) // Improved workload
+
   for (int y = 0; y <= image.height / 2; y += 4) {
-    float32x4_t imag = {
-        (2.0 * (double)y / ((double)image.height - 1.0)) - 1.0,
-        (2.0 * (double)(y + 1) / ((double)image.height - 1.0)) - 1.0,
-        (2.0 * (double)(y + 2) / ((double)image.height - 1.0)) - 1.0,
-        (2.0 * (double)(y + 3) / ((double)image.height - 1.0)) - 1.0};
+    for (int i = 0; i < 4; ++i) {
+      imag_values[i] = (2.0 * (y + i) / (image.height - 1.0)) - 1.0;
+    }
+    float32x4_t imag = vld1q_f32(imag_values);
 
     for (int x = 0; x < image.width; x++) {
       float reals = (3.0 * (double)x / ((double)image.width - 1.0)) - 2.0;

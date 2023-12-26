@@ -21,6 +21,7 @@
 float32x4_t mandelbrot_point_calc(float32x4_t x0, float32x4_t y0,
                                   const int max_iter) {
   // Check if inside the bulb
+  // Wikipedia formula
   float32x4_t q = vaddq_f32(vmulq_f32(vsubq_f32(x0, vdupq_n_f32(0.25)),
                                       vsubq_f32(x0, vdupq_n_f32(0.25))),
                             vmulq_f32(y0, y0));
@@ -33,16 +34,16 @@ float32x4_t mandelbrot_point_calc(float32x4_t x0, float32x4_t y0,
     return vdupq_n_f32(max_iter);
   } else {
     // Initialization
-    float32x4_t x = vdupq_n_f32(0);
-    float32x4_t y = vdupq_n_f32(0);
-    float32x4_t x2 = vdupq_n_f32(0);
-    float32x4_t y2 = vdupq_n_f32(0);
+    float32x4_t x = vdupq_n_f32(0), y = vdupq_n_f32(0);
+    float32x4_t x2 = vdupq_n_f32(0), y2 = vdupq_n_f32(0);
+
     uint32x4_t result = vdupq_n_u32(0);
-    float32x4_t old_position_real = vdupq_n_f32(0);
-    float32x4_t old_position_imag = vdupq_n_f32(0);
-    uint32x4_t mask;
-    uint32x4_t period_mask_real;
-    uint32x4_t period_mask_imag;
+
+    float32x4_t old_position_real = vdupq_n_f32(0),
+                old_position_imag = vdupq_n_f32(0);
+
+    uint32x4_t mask, period_mask_real, period_mask_imag;
+
     // // Create a mask where all bits are set
     int period = 0;
 
@@ -102,16 +103,12 @@ int mandelbrot_point_calc(float x0, float y0, const int max_iter) {
     // float complex z = c;
 
     // use the bailout method to keep in mind the derivative
-    float x = 0.0;
-    float y = 0.0;
-    float x_squared = 0.0;
-    float y_squared = 0.0;
+    float x = 0.0, y = 0.0, x_squared = 0.0, y_squared = 0.0;
 
     // periodicity checking
     int period = 0;
-    float old_position_real = 0.0;
-    float old_position_imag = 0.0;
-    //
+    float old_position_real = 0.0, old_position_imag = 0.0;
+
     // implement the function iteratively
     unsigned int i = 0;
     while (i < max_iter) {
