@@ -71,12 +71,50 @@ int create_image(const char *file_name, const int max_iter, const int n_rows) {
   const float log_max_iter = log((float)max_iter);
 
 #ifdef SIMD
+
+#define NUM_PIXELS 4
+
+  // Parallel computation using OpenMP
+#pragma omp parallel for schedule(dynamic)
+  for (int y = 0; y <= image.height / 2; y += 4) {
+    float imag_values[NUM_PIXELS];
+    for (int i = 0; i < 4; ++i) {
+      imag_values[i] = (2.0 * (y + i) / (image.height - 1.0)) - 1.0;
+    }
+    v4sf imag = *(v4sf *)imag_values;
+
+    for (int x = 0; x < image.width; x++) {
+      float reals = (3.0 * (float)x / ((float)image.width - 1.0)) - 2.0;
+      v4sf real = (v4sf){reals, reals, reals, reals};
+
+      // Compute the symmetric part together
+      char *pixel[NUM_PIXELS] = {
+          pixel_at(&image, x, y), pixel_at(&image, x, y + 1),
+          pixel_at(&image, x, y + 2), pixel_at(&image, x, y + 3)};
+
+      char *pixel_symmetric[NUM_PIXELS] = {
+          pixel_at(&image, x, image.height - y - 1),
+          pixel_at(&image, x, image.height - y - 2),
+          pixel_at(&image, x, image.height - y - 3),
+          pixel_at(&image, x, image.height - y - 4)};
+
+      // Compute the Mandelbrot set value for the current point
+      v4sf mandelbrot_val = mandelbrot_point_calc(real, imag, max_iter);
+
+      for (int i = 0; i < NUM_PIXELS; i++) {
+        *pixel[i] = MAX_COLOR * (log((float)mandelbrot_val[i]) / log_max_iter);
+        *pixel_symmetric[i] = *pixel[i];
+      }
+    }
+  }
+
+#elif __ARM_NEON
+
 #define NUM_PIXELS 4
 
   // Ensure alignment for SIMD operations using GCC/Clang specific attribute
   float imag_values[NUM_PIXELS] __attribute__((aligned(16)));
 
-// #elif __ARM_NEON
 #pragma omp parallel for schedule(dynamic) // Improved workload
 
   for (int y = 0; y <= image.height / 2; y += 4) {
@@ -102,9 +140,9 @@ int create_image(const char *file_name, const int max_iter, const int n_rows) {
 
       float32x4_t mandelbrot_val = mandelbrot_point_calc(real, imag, max_iter);
 
-      for (int j = 0; j < NUM_PIXELS; j++) {
-        *pixel[j] = MAX_COLOR * (log((float)mandelbrot_val[j]) / log_max_iter);
-        *pixel_symmetric[j] = *pixel[j];
+      for (int i = 0; i < NUM_PIXELS; i++) {
+        *pixel[i] = MAX_COLOR * (log((float)mandelbrot_val[i]) / log_max_iter);
+        *pixel_symmetric[i] = *pixel[i];
       }
     }
   }

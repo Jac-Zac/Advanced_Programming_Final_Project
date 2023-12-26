@@ -1,3 +1,6 @@
+from typing import Dict, List
+
+
 class EmptyStackException(Exception):
     pass
 
@@ -25,35 +28,35 @@ class Expression:
         raise NotImplementedError()
 
     @classmethod
-    def from_program(cls, text, dispatch):
+    def from_program(cls, text: str, dispatch: Dict[str, type]):
         cls.expresion = text
+        cls.dispatch = dispatch
         expression_stack = Stack()
 
         # Do what is needed
         for token in cls.expresion.split():
-            if token.isdigit():
-                expression_stack.push(Constant(token))
-            elif token.isalpha():
-                expression_stack.push(Variable(token))
-            else:
-                expression_stack.push(Operation(token))
+            if token in cls.dispatch:
                 # Get the correct class
                 operator_class = dispatch[token]
                 # Arguments of to pass
                 arguments = [
                     expression_stack.pop() for _ in range(operator_class.arity)
                 ]
-
                 expression_stack.push(operator_class(arguments))
+            elif token.isdigit():
+                expression_stack.push(Constant(int(token)))
+            elif token.isalpha():
+                expression_stack.push(Variable(token))
+            else:
+                raise ValueError(f"Unknown istruction: {token}")
 
         return expression_stack.pop()
 
     def evaluate(self, env):
-        self.env = env
-        # raise NotImplementedError()
+        raise NotImplementedError()
 
-    def __str__(self):
-        return f"The provided Expression is: {self.expresion}"
+    # def __str__(self):
+    #     return f"The provided Expression is: {self.expresion}"
 
 
 class MissingVariableException(Exception):
@@ -61,15 +64,13 @@ class MissingVariableException(Exception):
 
 
 class Variable(Expression):
-    def __init__(self, name):
+    def __init__(self, name: str):
         self.name = name
 
     def evaluate(self, env):
-        print("I'm hear")
         if self.name not in env:
-            raise MissingVariableException
+            raise MissingVariableException(f"Missing variable: {self.name}")
 
-        print(f"Return: {self.name =}")
         return env[self.name]
 
     def __str__(self):
@@ -81,7 +82,7 @@ class Constant(Expression):
         self.value = value
 
     def evaluate(self, env):
-        return float(self.value)
+        return self.value
 
     def __str__(self):
         return f"{self.value}"
@@ -92,32 +93,37 @@ class Operation(Expression):
         self.args = args
 
     def evaluate(self, env):
-        pass
+        # Look at how it is working again
+        return self.op(*[arg.evaluate(env) for arg in self.args])
 
     def op(self, *args):
         raise NotImplementedError()
 
     def __str__(self):
-        return f"Operation"
-        # raise NotImplementedError()
+        args_str = " ".join(str(arg) for arg in self.args)
+        return f"{self.__class__.__name__}({args_str})"
 
 
 class BinaryOp(Operation):
-    pass
+    arity = 2
+    # def evaluate(self, env):
+    #     self.left = self.args[0].evaluate(env)
+    #     self.right = self.args[1].evaluate(env)
+    #     return super().evaluate(env)
 
 
 class UnaryOp(Operation):
-    pass
+    arity = 1
 
 
 class Addition(BinaryOp):
-    arity = 2
-
-    def evaluate(self, env):
-        return self.args[0].evaluate(env) + self.args[1].evaluate(env)
+    # def op(self, *args):
+    #     return sum(args)
+    def op(self, a, b):
+        return a + b
 
     def __str__(self):
-        return f"({self.args[0]} + {self.args[1]})"
+        return f"({str(self.args[0])} + {str(self.args[1])})"
 
 
 class Subtraction(BinaryOp):
@@ -129,13 +135,11 @@ class Division(BinaryOp):
 
 
 class Multiplication(BinaryOp):
-    arity = 2
-
-    def evaluate(self, env):
-        return self.args[0].evaluate(env) * self.args[1].evaluate(env)
+    def op(self, a, b):
+        return a * b
 
     def __str__(self):
-        return f"({self.args[0]} * {self.args[1]})"
+        return f"({str(self.args[0])} * {str(self.args[1])})"
 
 
 class Power(BinaryOp):
@@ -165,6 +169,7 @@ d = {
 }
 
 # example = "2 3 + x * 6 5 - / abs 2 ** y 1/ + 1/"
+# example = "2 x +"
 example = "2 x + 3 *"
 
 e = Expression.from_program(example, d)
@@ -174,8 +179,10 @@ print(e)
 res = e.evaluate({"x": 3})
 
 # res = e.evaluate({"x": 3, "y": 7})
-print(res)
+# print(res)
 
-# Ouput attest:
+# Output attest:
 # (1/ (+ (1/ y) (** 2 (abs (/ (- 5 6) (* x (+ 3 2)))))))
 # 0.84022932953024
+
+# YOU can add a method compile to compile into C code that can then be runned

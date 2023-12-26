@@ -3,7 +3,7 @@
 #include <math.h>
 
 // #define RADIUS 2
-#define RADIUS_SQUARED 4
+#define RADIUS_SQUARED 4.0f
 
 // The period is chosen in relation to the number of max_iter
 // If we wanted a really high number of max iteration we should decide on a
@@ -16,8 +16,73 @@
 
 // Iterative implementation of mandelbrot_set -> less stack-frames
 
-// #ifdef __ARM_NEON
 #ifdef SIMD
+// The mandelbrot_point_calc function rewritten to use GCC vector types
+v4sf mandelbrot_point_calc(v4sf x0, v4sf y0, const int max_iter) {
+  // Early Bailout Test for Main Cardioid and Period-2 Bulb
+  v4sf q = ((x0 - 0.25f) * (x0 - 0.25f)) + (y0 * y0);
+  v4si cardioid_mask = (v4si)((q * (q + (x0 - 0.25f))) <= (0.25f * y0 * y0));
+  if (cardioid_mask[0] && cardioid_mask[1] && cardioid_mask[2] &&
+      cardioid_mask[3]) {
+    return (v4sf){max_iter, max_iter, max_iter, max_iter};
+  }
+
+  // Initialization
+  v4sf x = {0, 0, 0, 0}, y = {0, 0, 0, 0};
+  v4sf x2 = {0, 0, 0, 0}, y2 = {0, 0, 0, 0};
+  v4sf x2_y2 = {0, 0, 0, 0};
+  v4si result = {0, 0, 0, 0};
+  v4si mask = {0, 0, 0, 0};
+
+  v4sf old_position_real = {0, 0, 0, 0}, old_position_imag = {0, 0, 0, 0};
+  int period = 0;
+
+  for (int i = 0; i < max_iter; i++) {
+    // Debugging print statements
+    // if (none_of(mask)) break;
+    // Break if all elements are outside the circle of radius squared
+    mask = (x2_y2 < (v4sf){RADIUS_SQUARED, RADIUS_SQUARED, RADIUS_SQUARED,
+                           RADIUS_SQUARED});
+
+    for (int i = 0; i < 4; i++) {
+      printf("Mask: %d\n", mask[i]);
+    }
+    printf("Newline \n");
+    // if (mask[0] <= 0 && mask[1] <= 0 && mask[2] <= 0 && mask[3] <= 0) {
+    //   break;
+    // }
+
+    y = (2.0f * x * y) + y0;
+    x = x2 - y2 + x0;
+
+    x2 = x * x;
+    y2 = y * y;
+    x2_y2 = x2 + y2;
+
+    // // Periodicity Check
+    // v4si period_mask_real = (v4si)(old_position_real == x);
+    // v4si period_mask_imag = (v4si)(old_position_imag == y);
+    //
+    // if (period_mask_real[0] && period_mask_real[1] && period_mask_real[2] &&
+    //     period_mask_real[3] && period_mask_imag[0] && period_mask_imag[1] &&
+    //     period_mask_imag[2] && period_mask_imag[3]) {
+    //   return (v4sf){max_iter, max_iter, max_iter, max_iter};
+    // }
+
+    // if (period % PERIOD == 0) {
+    //   old_position_real = x;
+    //   old_position_imag = y;
+    // }
+    //
+    result += (v4si){1, 1, 1, 1};
+    period++;
+    break;
+  }
+
+  return (v4sf)result;
+}
+
+#elif __ARM_NEON
 float32x4_t mandelbrot_point_calc(float32x4_t x0, float32x4_t y0,
                                   const int max_iter) {
   // Check if inside the bulb
