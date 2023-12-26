@@ -16,65 +16,75 @@
 
 // Iterative implementation of mandelbrot_set -> less stack-frames
 
-#ifdef __ARM_NEON
+// #ifdef __ARM_NEON
+#ifdef SIMD
 float32x4_t mandelbrot_point_calc(float32x4_t x0, float32x4_t y0,
                                   const int max_iter) {
-  // float q = (x0 - 0.25) * (x0 - 0.25) + y0 * y0;
-  // if (q * (q + (x0 - 0.25)) <= 0.25 * y0 * y0) {
-  //   return max_iter;
+  // Check if inside the bulb
+  float32x4_t q = vaddq_f32(vmulq_f32(vsubq_f32(x0, vdupq_n_f32(0.25)),
+                                      vsubq_f32(x0, vdupq_n_f32(0.25))),
+                            vmulq_f32(y0, y0));
 
-  // } else {
-  float32x4_t x = vdupq_n_f32(0);
-  float32x4_t y = vdupq_n_f32(0);
-  float32x4_t x2 = vdupq_n_f32(0);
-  float32x4_t y2 = vdupq_n_f32(0);
-  uint32x4_t result = vdupq_n_u32(0);
-  float32x4_t old_position_real = vdupq_n_f32(0);
-  float32x4_t old_position_imag = vdupq_n_f32(0);
-  uint32x4_t mask;
-  uint32x4_t period_mask;
-  // // Create a mask where all bits are set
-  uint32x4_t all_set_mask = vdupq_n_u32(~0);
-  int period = 0;
+  uint32x4_t mask =
+      vcleq_f32(vmulq_f32(q, vaddq_f32(q, vsubq_f32(x0, vdupq_n_f32(0.25)))),
+                vmulq_f32(vmulq_n_f32(y0, 0.25), y0));
 
-  for (int i = 0; i < max_iter; i++) {
-    mask = vcltq_f32(vaddq_f32(x2, y2), vdupq_n_f32(RADIUS_SQUARED));
+  if (vmaxvq_u32(mask) == 0xFFFFFFFF) {
+    return vdupq_n_f32(max_iter);
+  } else {
+    // Initialization
+    float32x4_t x = vdupq_n_f32(0);
+    float32x4_t y = vdupq_n_f32(0);
+    float32x4_t x2 = vdupq_n_f32(0);
+    float32x4_t y2 = vdupq_n_f32(0);
+    uint32x4_t result = vdupq_n_u32(0);
+    float32x4_t old_position_real = vdupq_n_f32(0);
+    float32x4_t old_position_imag = vdupq_n_f32(0);
+    uint32x4_t mask;
+    uint32x4_t period_mask_real;
+    uint32x4_t period_mask_imag;
+    // // Create a mask where all bits are set
+    int period = 0;
 
-    // // Break out of the loop if all points are outside the radius
-    if (vmaxvq_u32(mask) == 0) {
-      break;
+    for (int i = 0; i < max_iter; i++) {
+      mask = vcltq_f32(vaddq_f32(x2, y2), vdupq_n_f32(RADIUS_SQUARED));
+
+      // // Break out of the loop if all points are outside the radius
+      if (vmaxvq_u32(mask) == 0) {
+        break;
+      }
+
+      // y = 2 * x * y + y0;
+      // x = x_squared - y_squared + x0;
+      y = vmlaq_f32(y0, vmulq_n_f32(y, 2.0), x);
+      x = vaddq_f32(vsubq_f32(x2, y2), x0);
+
+      // Square the numbers
+      x2 = vmulq_f32(x, x);
+      y2 = vmulq_f32(y, y);
+
+      // Check if all elements in period_mask are set to 1
+      period_mask_real = vceqq_f32(old_position_real, x);
+      period_mask_imag = vceqq_f32(old_position_imag, y);
+
+      // Check if any elements in period_mask are set to 0
+      if ((vminvq_u32(period_mask_real) != 0) &&
+          (vminvq_u32(period_mask_imag) != 0)) {
+        return vdupq_n_f32(max_iter);
+      }
+
+      // Update every period
+      if (period % PERIOD == 0) {
+        old_position_real = x;
+        old_position_imag = y;
+      }
+
+      // Increment the result for points that are still within the radius
+      result = vaddq_u32(result, vandq_u32(vdupq_n_u32(1), mask));
+      period++;
     }
-
-    // y = 2 * x * y + y0;
-    // x = x_squared - y_squared + x0;
-    y = vmlaq_f32(y0, vmulq_n_f32(y, 2.0), x);
-    x = vaddq_f32(vsubq_f32(x2, y2), x0);
-
-    // Square the numbers
-    x2 = vmulq_f32(x, x);
-    y2 = vmulq_f32(y, y);
-
-    // There is something wrong with this
-    period_mask = vorrq_u32(vceqq_f32(old_position_real, x),
-                            vceqq_f32(old_position_imag, y));
-
-    // Check if all elements in period_mask are set to 1
-    if (vminvq_u32(veorq_u32(period_mask, all_set_mask)) == 0) {
-      return vdupq_n_f32(max_iter);
-    }
-
-    // Update every period
-    if (period % PERIOD == 0) {
-      old_position_real = x;
-      old_position_imag = y;
-    }
-
-    // Increment the result for points that are still within the radius
-    result = vaddq_u32(result, vandq_u32(vdupq_n_u32(1), mask));
-    period++;
+    return vcvtq_f32_u32(result);
   }
-  return vcvtq_f32_u32(result);
-  // }
 }
 #else
 

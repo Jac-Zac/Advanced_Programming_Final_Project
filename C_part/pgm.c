@@ -72,56 +72,7 @@ int create_image(const char *file_name, const int max_iter, const int n_rows) {
   const float log_max_iter = log((float)max_iter);
 
 #ifdef SIMD
-#pragma omp parallel for schedule(dynamic) // Improved workload
-  for (int y = 0; y <= image.height / 2; y += 8) {
-    v8df imag = {
-        (2.0 * (double)y / ((double)image.height - 1.0)) - 1.0,
-        (2.0 * (double)(y + 1) / ((double)image.height - 1.0)) - 1.0,
-        (2.0 * (double)(y + 2) / ((double)image.height - 1.0)) - 1.0,
-        (2.0 * (double)(y + 3) / ((double)image.height - 1.0)) - 1.0,
-        (2.0 * (double)(y + 4) / ((double)image.height - 1.0)) - 1.0,
-        (2.0 * (double)(y + 5) / ((double)image.height - 1.0)) - 1.0,
-        (2.0 * (double)(y + 6) / ((double)image.height - 1.0)) - 1.0,
-        (2.0 * (double)(y + 7) / ((double)image.height - 1.0)) - 1.0,
-    }; // Moved outside inner loop
-
-    for (int x = 0; x < image.width; x++) {
-      v8df real = {
-          (3.0 * (double)x / ((double)image.width - 1.0)) - 2.0,
-          (3.0 * (double)x / ((double)image.width - 1.0)) - 2.0,
-          (3.0 * (double)x / ((double)image.width - 1.0)) - 2.0,
-          (3.0 * (double)x / ((double)image.width - 1.0)) - 2.0,
-          (3.0 * (double)x / ((double)image.width - 1.0)) - 2.0,
-          (3.0 * (double)x / ((double)image.width - 1.0)) - 2.0,
-          (3.0 * (double)x / ((double)image.width - 1.0)) - 2.0,
-          (3.0 * (double)x / ((double)image.width - 1.0)) - 2.0,
-      };
-
-      // Compute the symmetric part together
-      char *pixel[8] = {pixel_at(&image, x, y),     pixel_at(&image, x, y + 1),
-                        pixel_at(&image, x, y + 2), pixel_at(&image, x, y + 3),
-                        pixel_at(&image, x, y + 4), pixel_at(&image, x, y + 5),
-                        pixel_at(&image, x, y + 6), pixel_at(&image, x, y + 7)};
-
-      char *pixel_symmetric[8] = {pixel_at(&image, x, image.height - y - 1),
-                                  pixel_at(&image, x, image.height - y - 2),
-                                  pixel_at(&image, x, image.height - y - 3),
-                                  pixel_at(&image, x, image.height - y - 4),
-                                  pixel_at(&image, x, image.height - y - 5),
-                                  pixel_at(&image, x, image.height - y - 6),
-                                  pixel_at(&image, x, image.height - y - 7),
-                                  pixel_at(&image, x, image.height - y - 8)};
-
-      v8df mandelbrot_val = mandelbrot_point_calc(real, imag, max_iter);
-
-      for (int j = 0; j < 8; j++) {
-        *pixel[j] = MAX_COLOR * (log((float)mandelbrot_val[j]) / log_max_iter);
-        *pixel_symmetric[j] = *pixel[j];
-      }
-    }
-  }
-
-#elif __ARM_NEON
+// #elif __ARM_NEON
 #define NUM_PIXELS 4
 #pragma omp parallel for schedule(dynamic) // Improved workload
   for (int y = 0; y <= image.height / 2; y += 4) {
