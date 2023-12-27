@@ -1,12 +1,12 @@
 import sys
 
-sys.path.append("../")
+sys.path.append("src/")
 
-from src.expressions import *
-from src.my_stack import Stack
+from src.expression import Expression
+from src.operation import *
 
 
-def test_expression_evaluation():
+def test_exercise_requirements():
     d = {
         "+": Addition,
         "*": Multiplication,

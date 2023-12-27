@@ -1,6 +1,7 @@
+# Jacopo Zacchigna .....
 from typing import Any
 
-from src.exceptions import *
+from exceptions import *
 
 
 class Stack:

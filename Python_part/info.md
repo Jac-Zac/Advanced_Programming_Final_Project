@@ -5,3 +5,5 @@ Maybe use something like slots in your classes
 Then solve avant of code day 1 in the transpiled language
 
 Maybe use the override decorator
+
+### Mayube add multiple inheritances
