@@ -38,6 +38,9 @@ class Nop(NullMixin, Instruction):
         # This operation does nothing
         pass
 
+    def __str__(self) -> str:
+        return f"nop"
+
 
 class Print(UnaryMixin, Instruction):
     """

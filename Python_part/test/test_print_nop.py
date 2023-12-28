@@ -15,7 +15,7 @@ def test_print_nop_operations():
 
     # Test Print: Evaluate and print an expression
     # x 5 setq x print
-    expression = Expression.from_program("x print 5 x setq ", dispatch)
+    expression = Expression.from_program("nop x print 5 x setq ", dispatch)
     env = {}
 
     result = expression.evaluate(env)

@@ -37,10 +37,14 @@ class Expression(ABC):
             if token in cls._dispatch:
                 operation_class = dispatch[token]
                 # Make some comment hear KSJDHLhdKLHD
-                arguments = [
-                    expression_stack.pop() for _ in range(operation_class.arity)
-                ]
-                expression_stack.push(operation_class(arguments))
+                if token == "nop":
+                    expression_stack.push(operation_class(None))
+                else:
+                    arguments = [
+                        expression_stack.pop() for _ in range(operation_class.arity)
+                    ]
+                    expression_stack.push(operation_class(arguments))
+
             elif token.isdigit():
                 expression_stack.push(Constant(int(token)))
             elif token.isalpha():

@@ -14,9 +14,6 @@ class Alloc(UnaryMixin, Instruction):
 
     def evaluate(self, env: Dict[str, Any]) -> Any:
         variable_name = str(self._args[0])
-        if variable_name in env:
-            raise ValueError(f"Variable '{variable_name}' already allocated")
-
         env[variable_name] = 0
         return None
 

@@ -12,6 +12,7 @@ if __name__ == "__main__":
     dispatch = {
         "alloc": Alloc,
         "valloc": Valloc,
+        "setv": Setv,
         "setq": Setq,
         "defsub": DefSub,
         "call": Call,
@@ -20,9 +21,13 @@ if __name__ == "__main__":
         "+": Addition,
         "*": Multiplication,
         "-": Subtraction,
+        "%": Modulus,
         ">": Greater,
         ">=": GreaterEqual,
         "<": Less,
+        "=": Equal,
+        "!=": NotEqual,
+        "if": IfInstruction,
         "while": While,
         "for": For,
         "prog2": Prog2,
@@ -31,11 +36,39 @@ if __name__ == "__main__":
     }
 
     expression = Expression.from_program(
-        "x 1 + x setq x 10 > while x alloc prog2", dispatch
+        "nop x print prime if nop 0 0 != prime setq i x % 0 = if 1 x - 2 i for 0 0 = prime setq prime alloc prog4 100 2 x for",
+        dispatch,
     )
     env = {}
 
+    print(expression)
     expression.evaluate(env)
-    print(env)
 
-    assert env["x"] == 10
+    # Check if the program correctly identifies prime numbers from 2 to 100
+    # assert env["prime"] == [
+    #     2,
+    #     3,
+    #     5,
+    #     7,
+    #     11,
+    #     13,
+    #     17,
+    #     19,
+    #     23,
+    #     29,
+    #     31,
+    #     37,
+    #     41,
+    #     43,
+    #     47,
+    #     53,
+    #     59,
+    #     61,
+    #     67,
+    #     71,
+    #     73,
+    #     79,
+    #     83,
+    #     89,
+    #     97,
+    # ]

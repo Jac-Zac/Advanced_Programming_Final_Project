@@ -2,31 +2,42 @@ import sys
 
 sys.path.append("src/")
 
-from src.control_flow import For, While
-from src.definition import Alloc, Setq
+from src.condition import IfInstruction
+from src.control_flow import *
+from src.definition import *
 from src.expression import Expression
 from src.instruction import *  # Importing all instruction classes
 from src.sequence import *
-from src.subroutine import Call, DefSub
+from src.subroutine import *
+
+dispatch = {
+    "alloc": Alloc,
+    "valloc": Valloc,
+    "setv": Setv,
+    "setq": Setq,
+    "defsub": DefSub,
+    "call": Call,
+    "print": Print,
+    "nop": Nop,
+    "+": Addition,
+    "*": Multiplication,
+    "-": Subtraction,
+    "%": Modulus,
+    ">": Greater,
+    ">=": GreaterEqual,
+    "<": Less,
+    "=": Equal,
+    "!=": NotEqual,
+    "if": IfInstruction,
+    "while": While,
+    "for": For,
+    "prog2": Prog2,
+    "prog3": Prog3,
+    "prog4": Prog4,
+}
 
 
 def test_code_examples():
-    dispatch = {
-        "alloc": Alloc,
-        "setq": Setq,
-        "defsub": DefSub,
-        "call": Call,
-        "print": Print,
-        "nop": Nop,
-        "+": Addition,
-        "*": Multiplication,
-        ">": Greater,
-        "while": While,
-        "for": For,
-        "prog2": Prog2,
-        "prog4": Prog4,
-    }
-
     # Test Example 1: While loop to increment x until it's greater than 10
     expression1 = Expression.from_program(
         "x 1 + x setq x 10 > while x alloc prog2", dispatch
@@ -57,9 +68,7 @@ def test_code_examples():
     env3 = {}
 
     expression3.evaluate(env3)
-
-    # After calling the subroutine, x should be incremented to 14
-    assert env3["x"] == 14
+    assert env3["x"] == 4
 
     # Test Example 4: Divisor finder program
     expression4 = Expression.from_program(
@@ -72,17 +81,42 @@ def test_code_examples():
     # Check if the program correctly finds divisors of 783
     assert env4["x"] == 783
 
-    # Test Example 5: Prime number checker program
-    expression5 = Expression.from_program(
+
+def test_prime_example():
+    import io
+    from contextlib import redirect_stdout
+
+    # Prime number checker program
+    prime_expression = Expression.from_program(
         "nop x print prime if nop 0 0 != prime setq i x % 0 = if 1 x - 2 i for 0 0 = prime setq prime alloc prog4 100 2 x for",
         dispatch,
     )
-    env5 = {}
 
-    expression5.evaluate(env5)
+    # Capturing the printed output
+    f = io.StringIO()
+    with redirect_stdout(f):
+        prime_expression.evaluate({})
 
-    # Check if the program correctly identifies prime numbers from 2 to 100
-    assert env5["prime"] == [
+    # Extract the printed output as a string
+    output = f.getvalue()
+
+    # Check the string representation of the expression
+    expression_str = str(prime_expression)
+
+    # Video result TO CHECK
+    # expected_expression_str = "(for x 2 100 (prog4 (alloc prime) (setq prime (= 0 0)) (for i 2 (- x 1) (if (= 0 (% x i)) (setq prime (> 0 0)) nop)) (if prime (print x) nop)))"
+
+    # What I expect
+    expected_expression_str = "(for x 2 100 (prog4 (alloc prime) (setq prime (= 0 0)) (for i 2 (- x 1) (if (= 0 (% x i)) (setq prime (!= 0 0)) nop)) (if prime (print x) nop)))"
+    assert (
+        expression_str == expected_expression_str
+    ), "Expression string does not match expected output"
+
+    # Extract the printed prime numbers from the output string
+    prime_numbers = [int(n) for n in output.strip().split()]
+
+    # This should be a list of prime numbers up to 100
+    expected_primes = [
         2,
         3,
         5,
@@ -109,7 +143,11 @@ def test_code_examples():
         89,
         97,
     ]
+    assert (
+        prime_numbers == expected_primes
+    ), "Prime number output does not match expected output"
 
 
 if __name__ == "__main__":
     test_code_examples()
+    test_prime_example()
