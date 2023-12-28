@@ -1,10 +1,10 @@
 from typing import Any, Dict
 
-from operation import BinaryOp, TernaryOp, UnaryOp
-from utils.exceptions import *
+from instruction import Instruction
+from utils.mixins import BinaryMixin, TernaryMixin, UnaryMixin
 
 
-class Alloc(UnaryOp):
+class Alloc(UnaryMixin, Instruction):
     """
     Allocates a single variable and initializes it to 0 in the environment.
 
@@ -13,7 +13,7 @@ class Alloc(UnaryOp):
     """
 
     def evaluate(self, env: Dict[str, Any]) -> Any:
-        variable_name = str(self.args[0])
+        variable_name = str(self._args[0])
         if variable_name in env:
             raise ValueError(f"Variable '{variable_name}' already allocated")
 
@@ -21,7 +21,7 @@ class Alloc(UnaryOp):
         return None
 
 
-class Valloc(BinaryOp):
+class Valloc(BinaryMixin, Instruction):
     """
     Allocates an array for a variable with a specified size and initializes all elements to 0.
 
@@ -31,9 +31,9 @@ class Valloc(BinaryOp):
 
     def evaluate(self, env: Dict[str, Any]) -> Any:
         # Expecting a Variable object
-        variable_name = str(self.args[0])
+        variable_name = str(self._args[0])
         # Evaluate to get the size
-        size = self.args[1].evaluate(env)
+        size = self._args[1].evaluate(env)
 
         if not isinstance(size, int) or size < 0:
             raise ValueError("Array size must be a non-negative integer")
@@ -45,7 +45,7 @@ class Valloc(BinaryOp):
         return None
 
 
-class Setq(BinaryOp):
+class Setq(BinaryMixin, Instruction):
     """
     Sets the value of a single variable to a new value.
 
@@ -54,13 +54,13 @@ class Setq(BinaryOp):
     """
 
     def evaluate(self, env: Dict[str, Any]) -> Any:
-        variable_name = str(self.args[0])
-        new_value = self.args[1].evaluate(env)
+        variable_name = str(self._args[0])
+        new_value = self._args[1].evaluate(env)
         env[variable_name] = new_value
         return new_value
 
 
-class Setv(TernaryOp):
+class Setv(TernaryMixin, Instruction):
     """
     Sets a specific index of an array variable to a new value.
 
@@ -69,9 +69,9 @@ class Setv(TernaryOp):
     """
 
     def evaluate(self, env: Dict[str, Any]) -> Any:
-        array_name = str(self.args[0])  # String that represent the variable name
-        new_value = self.args[2].evaluate(env)  # Evaluate to get the new value
-        index = self.args[1].evaluate(env)  # Evaluate to get the index
+        array_name = str(self._args[0])  # String that represent the variable name
+        new_value = self._args[2].evaluate(env)  # Evaluate to get the new value
+        index = self._args[1].evaluate(env)  # Evaluate to get the index
 
         if not isinstance(env[array_name], list):
             raise ValueError(f"Variable {array_name} is not an array")

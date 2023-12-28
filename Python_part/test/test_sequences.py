@@ -4,7 +4,18 @@ sys.path.append("src/")
 
 from src.definition import *
 from src.expression import Expression
-from src.sequences import *
+from src.sequence import *
+
+
+def test_prog1():
+    dispatch = {"alloc": Alloc, "setq": Setq, "prog1": Prog1}
+    # Test with a single setq operation
+    expression = Expression.from_program("5 x setq prog1", dispatch)
+    env = {}
+    result = expression.evaluate(env)
+
+    assert result == 5  # The result should be the value of the setq operation
+    assert env["x"] == 5  # x should be set to 5
 
 
 def test_prog2():
@@ -15,6 +26,33 @@ def test_prog2():
     assert result == 5  # The result should be the value of the first expression
     assert env["x"] == 5
     assert env["y"] == 10
+
+
+def test_prog3():
+    dispatch = {"alloc": Alloc, "setq": Setq, "prog3": Prog3}
+    expression = Expression.from_program(
+        "x alloc 5 x setq 10 y setq 20 z setq prog3", dispatch
+    )
+    env = {}
+    result = expression.evaluate(env)
+    assert result == 5  # The result should be the value of the first expression
+    assert env["x"] == 5  # x should be set to 5
+    assert env["y"] == 10  # y should be set to 10
+    assert env["z"] == 20  # z should be set to 20
+
+
+def test_prog4():
+    dispatch = {"alloc": Alloc, "setq": Setq, "prog4": Prog4}
+    expression = Expression.from_program(
+        "x alloc 5 x setq 10 y setq 20 z setq 30 w setq prog4", dispatch
+    )
+    env = {}
+    result = expression.evaluate(env)
+    assert result == 5  # The result should be the value of the first expression
+    assert env["x"] == 5  # x should be set to 5
+    assert env["y"] == 10  # y should be set to 10
+    assert env["z"] == 20  # z should be set to 20
+    assert env["w"] == 30  # w should be set to 30
 
 
 # def test_variable_definition_and_manipulation():

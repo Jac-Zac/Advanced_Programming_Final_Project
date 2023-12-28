@@ -3,6 +3,7 @@ import sys
 sys.path.append("src/")
 
 from src.expression import Expression
+from src.instruction import Instruction
 from src.operation import *
 
 

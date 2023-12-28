@@ -4,7 +4,7 @@ sys.path.append("src/")
 
 from src.comparison import *
 from src.expression import Expression
-from src.operation import *
+from src.instruction import *
 
 
 def test_comparison_operators():

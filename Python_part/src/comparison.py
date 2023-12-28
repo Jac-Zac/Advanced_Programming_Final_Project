@@ -1,39 +1,46 @@
 # Jacopo Zacchigna
 ############################## Comparison Instructions ##############################
-from operation import BinaryOp
+from abc import abstractmethod
+
+from operation import Operation
+from utils.mixins import BinaryMixin
 
 
-class ComparisonOp(BinaryOp):
+class ComparisonOp(BinaryMixin, Operation):
     """
     Base class for comparison Instructions.
     """
 
+    @abstractmethod
+    def _op(self, a, b):
+        raise NotImplementedError()
+
 
 class Greater(ComparisonOp):
-    def op(self, a, b):
+    def _op(self, a, b):
         return a > b
 
 
 class GreaterEqual(ComparisonOp):
-    def op(self, a, b):
+    def _op(self, a, b):
         return a >= b
 
 
 class Equal(ComparisonOp):
-    def op(self, a, b):
+    def _op(self, a, b):
         return a == b
 
 
 class NotEqual(ComparisonOp):
-    def op(self, a, b):
+    def _op(self, a, b):
         return a != b
 
 
 class Less(ComparisonOp):
-    def op(self, a, b):
+    def _op(self, a, b):
         return a < b
 
 
 class LessEqual(ComparisonOp):
-    def op(self, a, b):
+    def _op(self, a, b):
         return a <= b

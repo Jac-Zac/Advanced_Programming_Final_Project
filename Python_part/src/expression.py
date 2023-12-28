@@ -2,7 +2,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict
 
-from utils.exceptions import *
+from utils.exception import *
 from utils.stack import Stack
 
 
@@ -30,11 +30,11 @@ class Expression(ABC):
         Raises:
             ValueError: If an unknown instruction is encountered.
         """
-        cls.dispatch = dispatch
+        cls._dispatch = dispatch
         expression_stack = Stack()
 
         for token in text.split():
-            if token in cls.dispatch:
+            if token in cls._dispatch:
                 operation_class = dispatch[token]
                 # Make some comment hear KSJDHLhdKLHD
                 arguments = [
