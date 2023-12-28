@@ -44,15 +44,11 @@ class Print(UnaryMixin, Instruction):
     Evaluates an expression and prints the result.
     """
 
-    def __init__(self, args):
-        # Expecting args to be [expression]
-        if len(args) != 1:
-            raise ValueError("Print requires exactly one argument: expression")
-        self.expression = args[0]
-
     def evaluate(self, env: Dict[str, Any]) -> Any:
+        expression = self._args[0]
+
         # Evaluate the expression and print its result
-        result = self.expression.evaluate(env)
+        result = expression.evaluate(env)
         print(result)
         return result
 

@@ -38,9 +38,6 @@ class Valloc(BinaryMixin, Instruction):
         if not isinstance(size, int) or size < 0:
             raise ValueError("Array size must be a non-negative integer")
 
-        if variable_name in env:
-            raise ValueError(f"Variable '{variable_name}' already allocated")
-
         env[variable_name] = [0] * size
         return None
 

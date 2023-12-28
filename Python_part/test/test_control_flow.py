@@ -4,7 +4,9 @@ sys.path.append("src/")
 
 from src.control_flow import *
 from src.definition import (  # Assuming these are defined for setting and allocating variables
-    Alloc, Setq)
+    Alloc,
+    Setq,
+)
 from src.expression import Expression
 from src.instruction import *
 
@@ -16,11 +18,12 @@ def test_while_control_flow():
         "while": While,
         "<": Less,
         "-": Subtraction,
+        "+": Addition,
     }
 
-    # Test While loop: Decrement x until it is less than 1
-    expression = Expression.from_program("x 1 < 1 x - x setq while", dispatch)
-    env = {"x": 3}
+    # Test While loop: X is less then 10 we increase the value
+    expression = Expression.from_program("1 x + x 10 < while", dispatch)
+    env = {"x": 0}
 
     expression.evaluate(env)
 
@@ -39,7 +42,7 @@ def test_for_control_flow():
 
     # Test For loop: Sum numbers from 0 to 4
     # for i 0 5 (sum i + sum setq)
-    expression = Expression.from_program("sum i + sum setq 0 5 i for ", dispatch)
+    expression = Expression.from_program("sum i + sum setq 5 0 i for", dispatch)
     env = {"sum": 0}
 
     expression.evaluate(env)

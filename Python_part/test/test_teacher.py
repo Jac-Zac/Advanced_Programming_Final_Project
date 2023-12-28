@@ -31,11 +31,12 @@ def test_code_examples():
     expression1 = Expression.from_program(
         "x 1 + x setq x 10 > while x alloc prog2", dispatch
     )
+
     env1 = {}
 
     expression1.evaluate(env1)
 
-    # After the loop, x should be 11
+    # After the loop, x should be 10
     assert env1["x"] == 10
 
     # Test Example 2: For loop to initialize and print a vector

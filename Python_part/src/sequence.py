@@ -18,7 +18,7 @@ class ProgN(Instruction):
             raise ValueError("ProgN requires at least one argument")
 
         # Evaluate all expressions in reverse order
-        for arg in reversed(self._args[:-1]):
+        for arg in reversed(self._args[:1]):
             arg.evaluate(env)
 
         # Evaluate and return the result of the original first expression

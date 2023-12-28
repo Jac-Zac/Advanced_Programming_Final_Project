@@ -10,8 +10,8 @@ class DefSub(Instruction, BinaryMixin):
     """
 
     def evaluate(self, env: Dict[str, Any]) -> None:
-        variable_name = str(self._args[1])
-        expression = self._args[0]
+        variable_name = str(self._args[0])
+        expression = self._args[1]
 
         if variable_name in env:
             raise ValueError(f"Symbol: {variable_name} already exists")
