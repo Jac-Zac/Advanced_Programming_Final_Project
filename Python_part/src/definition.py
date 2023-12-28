@@ -1,7 +1,7 @@
 from typing import Any, Dict
 
-from instruction import Instruction
-from utils.mixins import BinaryMixin, TernaryMixin, UnaryMixin
+from .instruction import Instruction
+from .utils.mixins import BinaryMixin, TernaryMixin, UnaryMixin
 
 
 class Alloc(UnaryMixin, Instruction):

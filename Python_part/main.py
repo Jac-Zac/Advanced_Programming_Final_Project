@@ -1,12 +1,6 @@
 #!/usr/bin/env python3
 
-from condition import IfInstruction
-from control_flow import *
-from definition import *
-from expression import *
-from instruction import *
-from sequence import *
-from subroutine import *
+from src import *
 
 if __name__ == "__main__":
     dispatch = {
@@ -43,32 +37,3 @@ if __name__ == "__main__":
 
     print(expression)
     expression.evaluate(env)
-
-    # Check if the program correctly identifies prime numbers from 2 to 100
-    # assert env["prime"] == [
-    #     2,
-    #     3,
-    #     5,
-    #     7,
-    #     11,
-    #     13,
-    #     17,
-    #     19,
-    #     23,
-    #     29,
-    #     31,
-    #     37,
-    #     41,
-    #     43,
-    #     47,
-    #     53,
-    #     59,
-    #     61,
-    #     67,
-    #     71,
-    #     73,
-    #     79,
-    #     83,
-    #     89,
-    #     97,
-    # ]

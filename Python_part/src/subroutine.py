@@ -1,7 +1,7 @@
 from typing import Any, Dict
 
-from instruction import Instruction
-from utils.mixins import BinaryMixin, UnaryMixin
+from .instruction import Instruction
+from .utils.mixins import BinaryMixin, UnaryMixin
 
 
 class DefSub(Instruction, BinaryMixin):

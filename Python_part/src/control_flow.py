@@ -1,7 +1,7 @@
 from typing import Any, Dict
 
-from instruction import Instruction
-from utils.mixins import BinaryMixin, QuaternaryMixin
+from .instruction import Instruction
+from .utils.mixins import BinaryMixin, QuaternaryMixin
 
 
 class While(BinaryMixin, Instruction):

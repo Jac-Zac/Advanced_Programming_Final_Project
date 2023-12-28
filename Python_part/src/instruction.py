@@ -2,8 +2,8 @@
 from abc import abstractmethod
 from typing import Any, Dict, List
 
-from expression import Expression
-from utils.mixins import BinaryMixin, NullMixin, UnaryMixin
+from .expression import Expression
+from .utils.mixins import BinaryMixin, NullMixin, UnaryMixin
 
 
 class Instruction(Expression):

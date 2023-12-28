@@ -1,7 +1,7 @@
 from typing import Any, Dict
 
-from instruction import Instruction
-from utils.mixins import TernaryMixin
+from .instruction import Instruction
+from .utils.mixins import TernaryMixin
 
 
 class IfInstruction(TernaryMixin, Instruction):

@@ -1,7 +1,8 @@
 from typing import Any, Dict
 
-from instruction import Instruction
-from utils.mixins import BinaryMixin, QuaternaryMixin, TernaryMixin, UnaryMixin
+from .instruction import Instruction
+from .utils.mixins import (BinaryMixin, QuaternaryMixin, TernaryMixin,
+                           UnaryMixin)
 
 
 class ProgN(Instruction):

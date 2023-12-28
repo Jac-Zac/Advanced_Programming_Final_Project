@@ -2,8 +2,8 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict
 
-from utils.exception import *
-from utils.stack import Stack
+from .utils.exception import *
+from .utils.stack import Stack
 
 
 class Expression(ABC):

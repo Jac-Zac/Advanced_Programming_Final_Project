@@ -1,7 +1,7 @@
 # Jacopo Zacchigna .....
 from typing import Any
 
-from utils.exception import *
+from .exception import *
 
 
 class Stack:
