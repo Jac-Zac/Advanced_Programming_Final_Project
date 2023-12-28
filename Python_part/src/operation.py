@@ -1,5 +1,4 @@
-# Jacopo Zacchinga ...
-
+# Jacopo Zacchigna
 from abc import abstractmethod
 from typing import Any, Dict, List
 
@@ -13,10 +12,12 @@ class Operation(Expression):
         self.args = args
 
     def evaluate(self, env: Dict[str, Any]) -> Any:
+        pass
         """
-        Evaluate the operation in a given Expression
+        Evaluate the Operation in a given Expression
 
-        This method processes each argument of the operation by evaluating them recursively until we meat a variable or a constant, and then applies the operation defined in the 'op' method to these evaluated arguments.
+        This method processes each argument of the Operation by evaluating them recursively until we meat a variable or a constant.
+        It then applies the operation defined in the 'op' method to these evaluated arguments.
 
         Parameters:
         env (Dict[str, Any]): The environment for variable evaluation.
@@ -109,42 +110,3 @@ class Reciprocal(UnaryOp):
 class AbsoluteValue(UnaryOp):
     def op(self, a):
         return abs(a)
-
-
-############################## Comparison Operations ##############################
-
-
-class ComparisonOp(BinaryOp):
-    """
-    Base class for comparison operations.
-    """
-
-
-class Greater(ComparisonOp):
-    def op(self, a, b):
-        return a > b
-
-
-class GreaterEqual(ComparisonOp):
-    def op(self, a, b):
-        return a >= b
-
-
-class Equal(ComparisonOp):
-    def op(self, a, b):
-        return a == b
-
-
-class NotEqual(ComparisonOp):
-    def op(self, a, b):
-        return a != b
-
-
-class Less(ComparisonOp):
-    def op(self, a, b):
-        return a < b
-
-
-class LessEqual(ComparisonOp):
-    def op(self, a, b):
-        return a <= b

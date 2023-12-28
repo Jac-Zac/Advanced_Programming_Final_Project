@@ -1,7 +1,7 @@
 from typing import Any, Dict
 
-from exceptions import *
 from operation import BinaryOp, TernaryOp, UnaryOp
+from utils.exceptions import *
 
 
 class Alloc(UnaryOp):

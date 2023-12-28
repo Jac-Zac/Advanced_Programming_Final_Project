@@ -2,6 +2,7 @@ import sys
 
 sys.path.append("src/")
 
+from src.comparison import *
 from src.expression import Expression
 from src.operation import *
 

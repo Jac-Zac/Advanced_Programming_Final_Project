@@ -2,9 +2,9 @@ import sys
 
 sys.path.append("src/")
 
+from src.definition import *
 from src.expression import Expression
 from src.sequences import *
-from src.variable_definition import *
 
 
 def test_prog2():

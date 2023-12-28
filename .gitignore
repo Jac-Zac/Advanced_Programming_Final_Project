@@ -3,3 +3,5 @@
 **/*.o
 **/.pgm
 **/main
+**/__pycache__ 
+**/.pytest_cache/
