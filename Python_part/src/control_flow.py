@@ -12,7 +12,8 @@ class ControlFlowOp(BinaryMixin, Instruction):
     """
 
     def evaluate(self, env: Dict[str, Any]) -> Any:
-        return self._op(*[arg.evaluate(env) for arg in self._args])
+        # Pass the arguments as is to the _op method, don't evaluate here
+        return self._op(*self._args, env)
 
 
 class While(ControlFlowOp):
@@ -20,6 +21,10 @@ class While(ControlFlowOp):
     Executes 'expr' repeatedly as long as 'cond' is true.
     """
 
-    def _op(self, expr, cond):
-        while cond:
-            expr.evaluate(self.env)
+    def evaluate(self, env: Dict[str, Any]) -> Any:
+        # Extract the condition and expression without evaluating
+        cond, expr = self._args
+
+        # Continuously re-evaluate the condition within the loop
+        while cond.evaluate(env):
+            expr.evaluate(env)

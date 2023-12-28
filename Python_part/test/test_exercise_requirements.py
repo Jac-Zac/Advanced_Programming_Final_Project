@@ -2,9 +2,7 @@ import sys
 
 sys.path.append("src/")
 
-from src.expression import Expression
-from src.instruction import Instruction
-from src.operation import *
+from src.instruction import *
 
 
 def test_exercise_requirements():

@@ -2,11 +2,11 @@ import sys
 
 sys.path.append("src/")
 
-from src.comparison import *
-from src.control_flow import While
+from src.control_flow import *
 from src.definition import (  # Assuming these are defined for setting and allocating variables
     Alloc, Setq)
 from src.expression import Expression
+from src.instruction import *
 
 
 def test_while_control_flow():
@@ -14,7 +14,8 @@ def test_while_control_flow():
         "alloc": Alloc,
         "setq": Setq,
         "while": While,
-        "<": Less,  # Assuming Less is a comparison operation
+        "<": Less,
+        "-": Subtraction,
     }
 
     # Test While loop: Decrement x until it is less than 1
