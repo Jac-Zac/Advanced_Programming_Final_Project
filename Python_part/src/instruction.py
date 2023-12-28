@@ -115,12 +115,12 @@ class ComparisonOp(BinaryMixin, Operation):
 
 class Greater(ComparisonOp):
     def _op(self, a, b):
-        return a > b
+        return b > a
 
 
 class GreaterEqual(ComparisonOp):
     def _op(self, a, b):
-        return a >= b
+        return b >= a
 
 
 class Equal(ComparisonOp):
@@ -135,9 +135,9 @@ class NotEqual(ComparisonOp):
 
 class Less(ComparisonOp):
     def _op(self, a, b):
-        return a < b
+        return b < a
 
 
 class LessEqual(ComparisonOp):
     def _op(self, a, b):
-        return a <= b
+        return b <= a
