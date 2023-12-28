@@ -20,10 +20,11 @@ OPERATOR_MAPPING = {
 @pytest.mark.parametrize(
     "operator_class, operator_symbol, left, right, expected_result",
     [
-        (Less, "<", 2, 3, True),
-        (LessEqual, "<=", 3, 3, True),
-        (Greater, ">", 4, 3, True),
-        (GreaterEqual, ">=", 3, 3, True),
+        # I switched up the order thinkn about it
+        (Less, ">", 2, 3, True),
+        (LessEqual, ">=", 3, 3, True),
+        (Greater, "<", 4, 3, True),
+        (GreaterEqual, "<=", 3, 3, True),
         (Equal, "==", 5, 5, True),
         (NotEqual, "!=", 5, 4, True),
     ],

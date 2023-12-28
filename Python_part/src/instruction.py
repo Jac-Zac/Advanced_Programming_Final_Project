@@ -3,7 +3,7 @@ from abc import abstractmethod
 from typing import Any, Dict, List
 
 from expression import Expression
-from utils.mixins import BinaryMixin, UnaryMixin
+from utils.mixins import BinaryMixin, NullMixin, UnaryMixin
 
 
 class Instruction(Expression):
@@ -27,6 +27,34 @@ class Instruction(Expression):
             if isinstance(self, cls):
                 return name
         return "unknown"
+
+
+class Nop(NullMixin, Instruction):
+    """
+    Does not perform any operation.
+    """
+
+    def evaluate(self, env: Dict[str, Any]) -> None:
+        # This operation does nothing
+        pass
+
+
+class Print(UnaryMixin, Instruction):
+    """
+    Evaluates an expression and prints the result.
+    """
+
+    def __init__(self, args):
+        # Expecting args to be [expression]
+        if len(args) != 1:
+            raise ValueError("Print requires exactly one argument: expression")
+        self.expression = args[0]
+
+    def evaluate(self, env: Dict[str, Any]) -> Any:
+        # Evaluate the expression and print its result
+        result = self.expression.evaluate(env)
+        print(result)
+        return result
 
 
 ############################## Operations ##############################
@@ -115,12 +143,12 @@ class ComparisonOp(BinaryMixin, Operation):
 
 class Greater(ComparisonOp):
     def _op(self, a, b):
-        return b > a
+        return a > b
 
 
 class GreaterEqual(ComparisonOp):
     def _op(self, a, b):
-        return b >= a
+        return a >= b
 
 
 class Equal(ComparisonOp):
@@ -135,9 +163,9 @@ class NotEqual(ComparisonOp):
 
 class Less(ComparisonOp):
     def _op(self, a, b):
-        return b < a
+        return a < b
 
 
 class LessEqual(ComparisonOp):
     def _op(self, a, b):
-        return b <= a
+        return a <= b

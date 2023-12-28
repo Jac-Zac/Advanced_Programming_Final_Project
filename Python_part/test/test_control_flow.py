@@ -39,7 +39,7 @@ def test_for_control_flow():
 
     # Test For loop: Sum numbers from 0 to 4
     # for i 0 5 (sum i + sum setq)
-    expression = Expression.from_program("i 0 5 sum i + sum setq for", dispatch)
+    expression = Expression.from_program("sum i + sum setq 0 5 i for ", dispatch)
     env = {"sum": 0}
 
     expression.evaluate(env)

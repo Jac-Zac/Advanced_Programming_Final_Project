@@ -2,6 +2,10 @@
 
 
 # Mixin classes for arity
+class NullMixin:
+    arity = 1
+
+
 class UnaryMixin:
     arity = 1
 
