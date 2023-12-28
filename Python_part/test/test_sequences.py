@@ -29,7 +29,7 @@ def test_prog2():
 
 def test_prog3():
     dispatch = {"alloc": Alloc, "setq": Setq, "prog3": Prog3, "+": Addition}
-    expression = Expression.from_program("3 2 + x setqx alloc prog3", dispatch)
+    expression = Expression.from_program("3 2 + 10 x setq x alloc prog3", dispatch)
     env = {}
     result = expression.evaluate(env)
     assert result == 5  # The result should be the value of the first expression
