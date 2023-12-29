@@ -109,46 +109,45 @@ int create_image(const char *file_name, const int max_iter, const int n_rows) {
     }
   }
 
-// #elif __ARM_NEON
-//
-// #define NUM_PIXELS 4
-//
-//   // Ensure alignment for SIMD operations using GCC/Clang specific attribute
-//   float imag_values[NUM_PIXELS] __attribute__((aligned(16)));
-//
-// #pragma omp parallel for schedule(dynamic) // Improved workload
-//
-//   for (int y = 0; y <= image.height / 2; y += 4) {
-//     for (int i = 0; i < 4; ++i) {
-//       imag_values[i] = (2.0 * (y + i) / (image.height - 1.0)) - 1.0;
-//     }
-//     float32x4_t imag = vld1q_f32(imag_values);
-//
-//     for (int x = 0; x < image.width; x++) {
-//       float reals = (3.0 * (double)x / ((double)image.width - 1.0)) - 2.0;
-//       float32x4_t real = vld1q_dup_f32(&reals);
-//
-//       // Compute the symmetric part together
-//       char *pixel[NUM_PIXELS] = {
-//           pixel_at(&image, x, y), pixel_at(&image, x, y + 1),
-//           pixel_at(&image, x, y + 2), pixel_at(&image, x, y + 3)};
-//
-//       char *pixel_symmetric[NUM_PIXELS] = {
-//           pixel_at(&image, x, image.height - y - 1),
-//           pixel_at(&image, x, image.height - y - 2),
-//           pixel_at(&image, x, image.height - y - 3),
-//           pixel_at(&image, x, image.height - y - 4)};
-//
-//       uint32x4_t mandelbrot_val = mandelbrot_point_calc(real, imag,
-//       max_iter);
-//
-//       for (int i = 0; i < NUM_PIXELS; i++) {
-//         *pixel[i] = MAX_COLOR * (log((float)mandelbrot_val[i]) /
-//         log_max_iter); *pixel_symmetric[i] = *pixel[i];
-//       }
-//     }
-//   }
-//
+#elif __ARM_NEON
+
+#define NUM_PIXELS 4
+
+  // Ensure alignment for SIMD operations using GCC/Clang specific attribute
+  float imag_values[NUM_PIXELS] __attribute__((aligned(16)));
+
+#pragma omp parallel for schedule(dynamic) // Improved workload
+
+  for (int y = 0; y <= image.height / 2; y += 4) {
+    for (int i = 0; i < 4; ++i) {
+      imag_values[i] = (2.0 * (y + i) / (image.height - 1.0)) - 1.0;
+    }
+    float32x4_t imag = vld1q_f32(imag_values);
+
+    for (int x = 0; x < image.width; x++) {
+      float reals = (3.0 * (double)x / ((double)image.width - 1.0)) - 2.0;
+      float32x4_t real = vld1q_dup_f32(&reals);
+
+      // Compute the symmetric part together
+      char *pixel[NUM_PIXELS] = {
+          pixel_at(&image, x, y), pixel_at(&image, x, y + 1),
+          pixel_at(&image, x, y + 2), pixel_at(&image, x, y + 3)};
+
+      char *pixel_symmetric[NUM_PIXELS] = {
+          pixel_at(&image, x, image.height - y - 1),
+          pixel_at(&image, x, image.height - y - 2),
+          pixel_at(&image, x, image.height - y - 3),
+          pixel_at(&image, x, image.height - y - 4)};
+
+      uint32x4_t mandelbrot_val = mandelbrot_point_calc(real, imag, max_iter);
+
+      for (int i = 0; i < NUM_PIXELS; i++) {
+        *pixel[i] = MAX_COLOR * (log((float)mandelbrot_val[i]) / log_max_iter);
+        *pixel_symmetric[i] = *pixel[i];
+      }
+    }
+  }
+
 #else
   // distribution
   float y_normalization = 2.0 / ((float)image.height - 1.0);

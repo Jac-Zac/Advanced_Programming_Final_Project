@@ -28,22 +28,26 @@ v4si mandelbrot_point_calc(v4sf x0, v4sf y0, const int max_iter) {
   }
 
   // Initialization
-  v4sf x = {0, 0, 0, 0}, y = {0, 0, 0, 0};
-  v4sf x2 = x * x, y2 = y * y;
-  v4si result = {0, 0, 0, 0};
-  v4si mask = {-1, -1, -1, -1};
+  v4sf x = {0}, y = {0}, x2 = {0}, y2 = {0};
+  v4sf old_position_real = {0, 0, 0, 0}, old_position_imag = {0, 0, 0, 0};
   v4sf radius_squared = {RADIUS_SQUARED, RADIUS_SQUARED, RADIUS_SQUARED,
                          RADIUS_SQUARED};
 
-  v4sf old_position_real = {0, 0, 0, 0}, old_position_imag = {0, 0, 0, 0};
+  // Result
+  v4si result = {0};
+
+  // Masks
+  v4si mask = {-1, -1, -1, -1}, period_mask_real = {0, 0, 0, 0},
+       period_mask_imag = {0, 0, 0, 0};
+
   int period = 0;
 
   for (int i = 0; i < max_iter; i++) {
-    // get the mask
-    mask = (v4sf)(x2 + y2) < radius_squared;
+    // Update the mask which is reversed for some reason so I flip it
+    mask = -(v4si)((v4sf)(x2 + y2) < radius_squared);
 
-    // Limit the growth of x and y to prevent overflow
-    if (!mask[0] || !mask[1] || !mask[2] || !mask[3]) {
+    // Break if all points have escaped thus are equal to zero and thus not true
+    if (!mask[0] && !mask[1] && !mask[2] && !mask[3]) {
       break;
     }
 
@@ -53,99 +57,103 @@ v4si mandelbrot_point_calc(v4sf x0, v4sf y0, const int max_iter) {
     x2 = x * x;
     y2 = y * y;
 
-    // Periodicity Check (commented out for now)
-    v4si period_mask_real = (v4si)(old_position_real == x);
-    v4si period_mask_imag = (v4si)(old_position_imag == y);
+    // For some reason it doesn't skip much
+    // // Periodicity Check to get if it is different
+    // period_mask_real = -(v4si)(old_position_real == x);
+    // period_mask_imag = -(v4si)(old_position_imag == y);
+    //
+    // if ((period_mask_real[0] != 0 && period_mask_imag[0] != 0) ||
+    //     (period_mask_real[1] != 0 && period_mask_imag[1] != 0) ||
+    //     (period_mask_imag[2] != 0 && period_mask_real[2] != 0) ||
+    //     (period_mask_real[3] != 0 && period_mask_imag[3] != 0)) {
+    //   printf("Skipping \n");
+    //   return (v4si){max_iter, max_iter, max_iter, max_iter};
+    // }
+    //
+    // if (period % PERIOD == 0) {
+    //   old_position_real = x;
+    //   old_position_imag = y;
+    // }
 
-    if (period_mask_real[0] && period_mask_real[1] && period_mask_real[2] &&
-        period_mask_real[3] && period_mask_imag[0] && period_mask_imag[1] &&
-        period_mask_imag[2] && period_mask_imag[3]) {
-      return (v4si){max_iter, max_iter, max_iter, max_iter};
-    }
-    if (period % PERIOD == 0) {
-      old_position_real = x;
-      old_position_imag = y;
-    }
-
-    // Increment result only for points within the radius but the mask is -1
-    // we should flip it by simply decreasing result by that value
-    result -= (v4si){mask[0], mask[1], mask[2], mask[3]};
+    // Increment result for points that have not escaped
+    result += (v4si){mask[0], mask[1], mask[2], mask[3]};
   }
+
+  return result;
 
   return result;
 }
 
-// #elif __ARM_NEON
-// uint32x4_t mandelbrot_point_calc(float32x4_t x0, float32x4_t y0,
-//                                  const int max_iter) {
-//   // Check if inside the bulb
-//   // Wikipedia formula
-//   float32x4_t q = vaddq_f32(vmulq_f32(vsubq_f32(x0, vdupq_n_f32(0.25)),
-//                                       vsubq_f32(x0, vdupq_n_f32(0.25))),
-//                             vmulq_f32(y0, y0));
-//
-//   uint32x4_t mask =
-//       vcleq_f32(vmulq_f32(q, vaddq_f32(q, vsubq_f32(x0, vdupq_n_f32(0.25)))),
-//                 vmulq_f32(vmulq_n_f32(y0, 0.25), y0));
-//
-//   if (vmaxvq_u32(mask) == 0xFFFFFFFF) {
-//     return vdupq_n_u32(max_iter);
-//   } else {
-//     // Initialization
-//     float32x4_t x = vdupq_n_f32(0), y = vdupq_n_f32(0);
-//     float32x4_t x2 = vdupq_n_f32(0), y2 = vdupq_n_f32(0);
-//
-//     uint32x4_t result = vdupq_n_u32(0);
-//
-//     float32x4_t old_position_real = vdupq_n_f32(0),
-//                 old_position_imag = vdupq_n_f32(0);
-//
-//     uint32x4_t mask, period_mask_real, period_mask_imag;
-//
-//     // // Create a mask where all bits are set
-//     int period = 0;
-//
-//     for (int i = 0; i < max_iter; i++) {
-//       mask = vcltq_f32(vaddq_f32(x2, y2), vdupq_n_f32(RADIUS_SQUARED));
-//
-//       // // Break out of the loop if all points are outside the radius
-//       if (vmaxvq_u32(mask) == 0) {
-//         break;
-//       }
-//
-//       // y = 2 * x * y + y0;
-//       // x = x_squared - y_squared + x0;
-//       y = vmlaq_f32(y0, vmulq_n_f32(y, 2.0), x);
-//       x = vaddq_f32(vsubq_f32(x2, y2), x0);
-//
-//       // Square the numbers
-//       x2 = vmulq_f32(x, x);
-//       y2 = vmulq_f32(y, y);
-//
-//       // Check if all elements in period_mask are set to 1
-//       period_mask_real = vceqq_f32(old_position_real, x);
-//       period_mask_imag = vceqq_f32(old_position_imag, y);
-//
-//       // Check if any elements in period_mask are set to 0
-//       if ((vminvq_u32(period_mask_real) != 0) &&
-//           (vminvq_u32(period_mask_imag) != 0)) {
-//         return vdupq_n_u32(max_iter);
-//       }
-//
-//       // Update every period
-//       if (period % PERIOD == 0) {
-//         old_position_real = x;
-//         old_position_imag = y;
-//       }
-//
-//       // Increment the result for points that are still within the radius
-//       result = vaddq_u32(result, vandq_u32(vdupq_n_u32(1), mask));
-//       period++;
-//     }
-//     return result;
-//   }
-// }
-// #endif
+#elif __ARM_NEON
+uint32x4_t mandelbrot_point_calc(float32x4_t x0, float32x4_t y0,
+                                 const int max_iter) {
+  // Check if inside the bulb
+  // Wikipedia formula
+  float32x4_t q = vaddq_f32(vmulq_f32(vsubq_f32(x0, vdupq_n_f32(0.25)),
+                                      vsubq_f32(x0, vdupq_n_f32(0.25))),
+                            vmulq_f32(y0, y0));
+
+  uint32x4_t mask =
+      vcleq_f32(vmulq_f32(q, vaddq_f32(q, vsubq_f32(x0, vdupq_n_f32(0.25)))),
+                vmulq_f32(vmulq_n_f32(y0, 0.25), y0));
+
+  if (vmaxvq_u32(mask) == 0xFFFFFFFF) {
+    return vdupq_n_u32(max_iter);
+  } else {
+    // Initialization
+    float32x4_t x = vdupq_n_f32(0), y = vdupq_n_f32(0);
+    float32x4_t x2 = vdupq_n_f32(0), y2 = vdupq_n_f32(0);
+
+    uint32x4_t result = vdupq_n_u32(0);
+
+    float32x4_t old_position_real = vdupq_n_f32(0),
+                old_position_imag = vdupq_n_f32(0);
+
+    uint32x4_t mask, period_mask_real, period_mask_imag;
+
+    // // Create a mask where all bits are set
+    int period = 0;
+
+    for (int i = 0; i < max_iter; i++) {
+      mask = vcltq_f32(vaddq_f32(x2, y2), vdupq_n_f32(RADIUS_SQUARED));
+
+      // // Break out of the loop if all points are outside the radius
+      if (vmaxvq_u32(mask) == 0) {
+        break;
+      }
+
+      // y = 2 * x * y + y0;
+      // x = x_squared - y_squared + x0;
+      y = vmlaq_f32(y0, vmulq_n_f32(y, 2.0), x);
+      x = vaddq_f32(vsubq_f32(x2, y2), x0);
+
+      // Square the numbers
+      x2 = vmulq_f32(x, x);
+      y2 = vmulq_f32(y, y);
+
+      // Check if all elements in period_mask are set to 1
+      period_mask_real = vceqq_f32(old_position_real, x);
+      period_mask_imag = vceqq_f32(old_position_imag, y);
+
+      // Check if any elements in period_mask are set to 0
+      if ((vminvq_u32(period_mask_real) != 0) &&
+          (vminvq_u32(period_mask_imag) != 0)) {
+        return vdupq_n_u32(max_iter);
+      }
+
+      // Update every period
+      if (period % PERIOD == 0) {
+        old_position_real = x;
+        old_position_imag = y;
+      }
+
+      // Increment the result for points that are still within the radius
+      result = vaddq_u32(result, vandq_u32(vdupq_n_u32(1), mask));
+      period++;
+    }
+    return result;
+  }
+}
 #else
 // Clean up the number of arguments passed
 int mandelbrot_point_calc(float x0, float y0, const int max_iter) {
