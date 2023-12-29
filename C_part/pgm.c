@@ -77,7 +77,8 @@ int create_image(const char *file_name, const int max_iter, const int n_rows) {
   // Parallel computation using OpenMP
 #pragma omp parallel for schedule(dynamic)
   for (int y = 0; y <= image.height / 2; y += 4) {
-    float imag_values[NUM_PIXELS];
+    // Ensure alignment for SIMD operations using GCC/Clang specific attribute
+    float imag_values[NUM_PIXELS] __attribute__((aligned(16)));
     for (int i = 0; i < 4; ++i) {
       imag_values[i] = (2.0 * (y + i) / (image.height - 1.0)) - 1.0;
     }
@@ -99,7 +100,7 @@ int create_image(const char *file_name, const int max_iter, const int n_rows) {
           pixel_at(&image, x, image.height - y - 4)};
 
       // Compute the Mandelbrot set value for the current point
-      v4sf mandelbrot_val = mandelbrot_point_calc(real, imag, max_iter);
+      v4si mandelbrot_val = mandelbrot_point_calc(real, imag, max_iter);
 
       for (int i = 0; i < NUM_PIXELS; i++) {
         *pixel[i] = MAX_COLOR * (log((float)mandelbrot_val[i]) / log_max_iter);
@@ -138,7 +139,7 @@ int create_image(const char *file_name, const int max_iter, const int n_rows) {
           pixel_at(&image, x, image.height - y - 3),
           pixel_at(&image, x, image.height - y - 4)};
 
-      float32x4_t mandelbrot_val = mandelbrot_point_calc(real, imag, max_iter);
+      uint32x4_t mandelbrot_val = mandelbrot_point_calc(real, imag, max_iter);
 
       for (int i = 0; i < NUM_PIXELS; i++) {
         *pixel[i] = MAX_COLOR * (log((float)mandelbrot_val[i]) / log_max_iter);

@@ -18,48 +18,44 @@
 
 #ifdef SIMD
 // The mandelbrot_point_calc function rewritten to use GCC vector types
-v4sf mandelbrot_point_calc(v4sf x0, v4sf y0, const int max_iter) {
+v4si mandelbrot_point_calc(v4sf x0, v4sf y0, const int max_iter) {
   // Early Bailout Test for Main Cardioid and Period-2 Bulb
   v4sf q = ((x0 - 0.25f) * (x0 - 0.25f)) + (y0 * y0);
   v4si cardioid_mask = (v4si)((q * (q + (x0 - 0.25f))) <= (0.25f * y0 * y0));
   if (cardioid_mask[0] && cardioid_mask[1] && cardioid_mask[2] &&
       cardioid_mask[3]) {
-    return (v4sf){max_iter, max_iter, max_iter, max_iter};
+    return (v4si){max_iter, max_iter, max_iter, max_iter};
   }
 
   // Initialization
   v4sf x = {0, 0, 0, 0}, y = {0, 0, 0, 0};
   v4sf x2 = x * x, y2 = y * y;
-  v4sf result = {0, 0, 0, 0};
+  v4si result = {0, 0, 0, 0};
+  v4sf comparison = {RADIUS_SQUARED, RADIUS_SQUARED, RADIUS_SQUARED,
+                     RADIUS_SQUARED};
+  v4si mask = {-1, -1, -1, -1};
 
   v4sf old_position_real = {0, 0, 0, 0}, old_position_imag = {0, 0, 0, 0};
   int period = 0;
 
   for (int i = 0; i < max_iter; i++) {
+    // get the mask
+    v4si mask = (v4sf)(x2 + y2) < comparison;
+
+    // Limit the growth of x and y to prevent overflow
+    if (mask[0] == 0 || mask[1] == 0 || mask[2] == 0 || mask[3] == 0) {
+      break;
+    }
+
     y = (2.0f * x * y) + y0;
     x = x2 - y2 + x0;
 
     x2 = x * x;
     y2 = y * y;
 
-    v4sf mask = (v4sf)(x2 + y2 < (v4sf){RADIUS_SQUARED, RADIUS_SQUARED,
-                                        RADIUS_SQUARED, RADIUS_SQUARED});
-
-    // Debugging: Print the current values
-    // printf("Iteration %d: x = [%f, %f, %f, %f], y = [%f, %f, %f, %f]\n", i,
-    //        x[0], x[1], x[2], x[3], y[0], y[1], y[2], y[3]);
-    // printf("x2 + y2 = [%f, %f, %f, %f], Mask = [%f, %f, %f, %f]\n",
-    //        x2[0] + y2[0], x2[1] + y2[1], x2[2] + y2[2], x2[3] + y2[3],
-    //        mask[0], mask[1], mask[2], mask[3]);
-
-    // Limit the growth of x and y to prevent overflow
-    if (mask[0] == 0.0f && mask[1] == 0.0f && mask[2] == 0.0f &&
-        mask[3] == 0.0f) {
-      break;
-    }
-
-    // Increment result only for points within the radius
-    result += (v4sf){mask[0], mask[1], mask[2], mask[3]};
+    // Increment result only for points within the radius but the mask is -1
+    // we should flip it by simply decreasing result by that value
+    result -= (v4si){mask[0], mask[1], mask[2], mask[3]};
   }
 
   return result;
@@ -82,8 +78,8 @@ if (period % PERIOD == 0) {
 */
 
 #elif __ARM_NEON
-float32x4_t mandelbrot_point_calc(float32x4_t x0, float32x4_t y0,
-                                  const int max_iter) {
+uint32x4_t mandelbrot_point_calc(float32x4_t x0, float32x4_t y0,
+                                 const int max_iter) {
   // Check if inside the bulb
   // Wikipedia formula
   float32x4_t q = vaddq_f32(vmulq_f32(vsubq_f32(x0, vdupq_n_f32(0.25)),
@@ -95,7 +91,7 @@ float32x4_t mandelbrot_point_calc(float32x4_t x0, float32x4_t y0,
                 vmulq_f32(vmulq_n_f32(y0, 0.25), y0));
 
   if (vmaxvq_u32(mask) == 0xFFFFFFFF) {
-    return vdupq_n_f32(max_iter);
+    return vdupq_n_u32(max_iter);
   } else {
     // Initialization
     float32x4_t x = vdupq_n_f32(0), y = vdupq_n_f32(0);
@@ -135,7 +131,7 @@ float32x4_t mandelbrot_point_calc(float32x4_t x0, float32x4_t y0,
       // Check if any elements in period_mask are set to 0
       if ((vminvq_u32(period_mask_real) != 0) &&
           (vminvq_u32(period_mask_imag) != 0)) {
-        return vdupq_n_f32(max_iter);
+        return vdupq_n_u32(max_iter);
       }
 
       // Update every period
@@ -148,7 +144,7 @@ float32x4_t mandelbrot_point_calc(float32x4_t x0, float32x4_t y0,
       result = vaddq_u32(result, vandq_u32(vdupq_n_u32(1), mask));
       period++;
     }
-    return vcvtq_f32_u32(result);
+    return result;
   }
 }
 #else
