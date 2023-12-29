@@ -12,7 +12,7 @@ class Alloc(UnaryMixin, Instruction):
         args (list): Contains one argument, the name of the variable to allocate.
     """
 
-    def evaluate(self, env: Dict[str, Any]) -> Any:
+    def evaluate(self, env: Dict[str, Any]) -> None:
         variable_name = str(self._args[0])
         env[variable_name] = 0
         return None
@@ -26,7 +26,7 @@ class Valloc(BinaryMixin, Instruction):
         args (list): Contains two arguments, the name of the variable and the size of the array.
     """
 
-    def evaluate(self, env: Dict[str, Any]) -> Any:
+    def evaluate(self, env: Dict[str, Any]) -> None:
         # Expecting a Variable object
         variable_name = str(self._args[0])
         # Evaluate to get the size

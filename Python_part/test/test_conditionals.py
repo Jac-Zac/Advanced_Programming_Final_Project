@@ -1,10 +1,10 @@
-from src.condition import IfInstruction
+from src.condition import If
 from src.expression import Constant, Expression
 from src.instruction import Greater, Less
 
 
 def test_if_operation():
-    dispatch = {"if": IfInstruction, "const": Constant}
+    dispatch = {"if": If, "const": Constant}
     # Test with a truthy condition (non-zero number)
     expression1 = Expression.from_program("10 20 1 if", dispatch)
     env = {"x": 1}

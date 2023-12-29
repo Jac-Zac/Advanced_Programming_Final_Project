@@ -29,58 +29,57 @@ v4sf mandelbrot_point_calc(v4sf x0, v4sf y0, const int max_iter) {
 
   // Initialization
   v4sf x = {0, 0, 0, 0}, y = {0, 0, 0, 0};
-  v4sf x2 = {0, 0, 0, 0}, y2 = {0, 0, 0, 0};
-  v4sf x2_y2 = {0, 0, 0, 0};
-  v4si result = {0, 0, 0, 0};
-  v4si mask = {0, 0, 0, 0};
+  v4sf x2 = x * x, y2 = y * y;
+  v4sf result = {0, 0, 0, 0};
 
   v4sf old_position_real = {0, 0, 0, 0}, old_position_imag = {0, 0, 0, 0};
   int period = 0;
 
   for (int i = 0; i < max_iter; i++) {
-    // Debugging print statements
-    // if (none_of(mask)) break;
-    // Break if all elements are outside the circle of radius squared
-    mask = (x2_y2 < (v4sf){RADIUS_SQUARED, RADIUS_SQUARED, RADIUS_SQUARED,
-                           RADIUS_SQUARED});
-
-    for (int i = 0; i < 4; i++) {
-      printf("Mask: %d\n", mask[i]);
-    }
-    printf("Newline \n");
-    // if (mask[0] <= 0 && mask[1] <= 0 && mask[2] <= 0 && mask[3] <= 0) {
-    //   break;
-    // }
-
     y = (2.0f * x * y) + y0;
     x = x2 - y2 + x0;
 
     x2 = x * x;
     y2 = y * y;
-    x2_y2 = x2 + y2;
 
-    // // Periodicity Check
-    // v4si period_mask_real = (v4si)(old_position_real == x);
-    // v4si period_mask_imag = (v4si)(old_position_imag == y);
-    //
-    // if (period_mask_real[0] && period_mask_real[1] && period_mask_real[2] &&
-    //     period_mask_real[3] && period_mask_imag[0] && period_mask_imag[1] &&
-    //     period_mask_imag[2] && period_mask_imag[3]) {
-    //   return (v4sf){max_iter, max_iter, max_iter, max_iter};
-    // }
+    v4sf mask = (v4sf)(x2 + y2 < (v4sf){RADIUS_SQUARED, RADIUS_SQUARED,
+                                        RADIUS_SQUARED, RADIUS_SQUARED});
 
-    // if (period % PERIOD == 0) {
-    //   old_position_real = x;
-    //   old_position_imag = y;
-    // }
-    //
-    result += (v4si){1, 1, 1, 1};
-    period++;
-    break;
+    // Debugging: Print the current values
+    // printf("Iteration %d: x = [%f, %f, %f, %f], y = [%f, %f, %f, %f]\n", i,
+    //        x[0], x[1], x[2], x[3], y[0], y[1], y[2], y[3]);
+    // printf("x2 + y2 = [%f, %f, %f, %f], Mask = [%f, %f, %f, %f]\n",
+    //        x2[0] + y2[0], x2[1] + y2[1], x2[2] + y2[2], x2[3] + y2[3],
+    //        mask[0], mask[1], mask[2], mask[3]);
+
+    // Limit the growth of x and y to prevent overflow
+    if (mask[0] == 0.0f && mask[1] == 0.0f && mask[2] == 0.0f &&
+        mask[3] == 0.0f) {
+      break;
+    }
+
+    // Increment result only for points within the radius
+    result += (v4sf){mask[0], mask[1], mask[2], mask[3]};
   }
 
-  return (v4sf)result;
+  return result;
 }
+
+// Periodicity Check (commented out for now)
+/*
+v4si period_mask_real = (v4si)(old_position_real == x);
+v4si period_mask_imag = (v4si)(old_position_imag == y);
+
+if (period_mask_real[0] && period_mask_real[1] && period_mask_real[2] &&
+period_mask_real[3] && period_mask_imag[0] && period_mask_imag[1] &&
+period_mask_imag[2] && period_mask_imag[3]) { return (v4sf){max_iter,
+max_iter, max_iter, max_iter};
+}
+if (period % PERIOD == 0) {
+  old_position_real = x;
+  old_position_imag = y;
+}
+*/
 
 #elif __ARM_NEON
 float32x4_t mandelbrot_point_calc(float32x4_t x0, float32x4_t y0,

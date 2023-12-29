@@ -2,7 +2,7 @@ import sys
 
 sys.path.append("src/")
 
-from src.condition import IfInstruction
+from src.condition import If
 from src.control_flow import *
 from src.definition import *
 from src.expression import Expression
@@ -28,7 +28,7 @@ dispatch = {
     "<": Less,
     "=": Equal,
     "!=": NotEqual,
-    "if": IfInstruction,
+    "if": If,
     "while": While,
     "for": For,
     "prog2": Prog2,
@@ -103,11 +103,8 @@ def test_prime_example():
     # Check the string representation of the expression
     expression_str = str(prime_expression)
 
-    # Video result TO CHECK
-    # expected_expression_str = "(for x 2 100 (prog4 (alloc prime) (setq prime (= 0 0)) (for i 2 (- x 1) (if (= 0 (% x i)) (setq prime (> 0 0)) nop)) (if prime (print x) nop)))"
-
-    # What I expect
     expected_expression_str = "(for x 2 100 (prog4 (alloc prime) (setq prime (= 0 0)) (for i 2 (- x 1) (if (= 0 (% x i)) (setq prime (!= 0 0)) nop)) (if prime (print x) nop)))"
+
     assert (
         expression_str == expected_expression_str
     ), "Expression string does not match expected output"

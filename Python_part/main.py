@@ -21,7 +21,7 @@ if __name__ == "__main__":
         "<": Less,
         "=": Equal,
         "!=": NotEqual,
-        "if": IfInstruction,
+        "if": If,
         "while": While,
         "for": For,
         "prog2": Prog2,

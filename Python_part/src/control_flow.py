@@ -6,29 +6,27 @@ from .utils.mixins import BinaryMixin, QuaternaryMixin
 
 class While(BinaryMixin, Instruction):
     """
-    Executes 'expr' repeatedly as long as 'cond' is true.
+    Executes 'body' repeatedly as long as 'condition' is true.
     """
 
-    def evaluate(self, env: Dict[str, Any]) -> Any:
-        cond, expr = self._args  # Extract condition and expression
+    def evaluate(self, env: Dict[str, Any]) -> None:
+        condition, body = self._args
 
-        while cond.evaluate(env):  # Continuously evaluate condition
-            expr.evaluate(env)  # Evaluate expression in the loop
+        while condition.evaluate(env):
+            body.evaluate(env)
 
 
 class For(QuaternaryMixin, Instruction):
     """
-    Evaluates 'body_expr' multiple times with the loop variable 'i'
-    taking values from 'start_expr' to 'end_expr - 1'.
+    Executes 'body' multiple times with the loop variable taking values from 'start' to 'end - 1'.
     """
 
-    def evaluate(self, env: Dict[str, Any]) -> Any:
-        loop_var, start_expr, end_expr, body_expr = self._args
+    def evaluate(self, env: Dict[str, Any]) -> None:
+        loop_var, start, end, body = self._args
 
-        start, end = start_expr.evaluate(env), end_expr.evaluate(env)
+        start_val, end_val = start.evaluate(env), end.evaluate(env)
+        loop_var_name = str(loop_var)
 
-        loop_variable_name = str(loop_var)
-
-        for i in range(start, end):  # Loop from start to end - 1
-            env[loop_variable_name] = i
-            body_expr.evaluate(env)
+        for i in range(start_val, end_val):
+            env[loop_var_name] = i
+            body.evaluate(env)

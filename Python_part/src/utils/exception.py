@@ -15,3 +15,9 @@ class MissingVariableException(Exception):
     """Exception raised when the variable is not present in the env"""
 
     pass
+
+
+class UnknownTokenException(Exception):
+    """Exception raised when the token is Unknown"""
+
+    pass

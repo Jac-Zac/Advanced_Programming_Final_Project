@@ -50,15 +50,15 @@ class Expression(ABC):
             elif token.isalpha():
                 expression_stack.push(Variable(token))
             else:
-                raise ValueError(f"Unknown istruction: {token}")
+                raise UnknownTokenException(f"Unknown istruction: {token}")
 
         return expression_stack.pop()
 
     @abstractmethod
-    def evaluate(self, env):
+    def evaluate(self, env: Dict[str, Any]):
         raise NotImplementedError()
 
-    def __str__(self):
+    def __str__(self) -> str:
         raise NotImplementedError()
 
 
@@ -69,7 +69,7 @@ class Variable(Expression):
     def __init__(self, name: str):
         self._name = name
 
-    def evaluate(self, env: Dict[str, Any]) -> Any:
+    def evaluate(self, env: Dict[str, Any]) -> int:
         if self._name not in env:
             raise MissingVariableException(f"Missing variable: {self._name}")
 
@@ -81,9 +81,9 @@ class Variable(Expression):
 
 class Constant(Expression):
     def __init__(self, value):
-        self._value = value  # Protected member
+        self._value = value
 
-    def evaluate(self, env: Dict[str, Any]) -> Any:
+    def evaluate(self, env: Dict[str, Any]) -> int:
         return self._value
 
     def __str__(self) -> str:

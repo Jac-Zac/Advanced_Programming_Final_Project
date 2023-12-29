@@ -14,7 +14,7 @@ class Instruction(Expression):
     def evaluate(self, env: Dict[str, Any]) -> Any:
         raise NotImplemented
 
-    def _op(self, *args) -> Any:
+    def _op(self, *args):
         pass
 
     def __str__(self) -> str:
@@ -141,30 +141,30 @@ class ComparisonOp(BinaryMixin, Operation):
 
 
 class Greater(ComparisonOp):
-    def _op(self, a, b):
+    def _op(self, a, b) -> bool:
         return a > b
 
 
 class GreaterEqual(ComparisonOp):
-    def _op(self, a, b):
+    def _op(self, a, b) -> bool:
         return a >= b
 
 
 class Equal(ComparisonOp):
-    def _op(self, a, b):
+    def _op(self, a, b) -> bool:
         return a == b
 
 
 class NotEqual(ComparisonOp):
-    def _op(self, a, b):
+    def _op(self, a, b) -> bool:
         return a != b
 
 
 class Less(ComparisonOp):
-    def _op(self, a, b):
+    def _op(self, a, b) -> bool:
         return a < b
 
 
 class LessEqual(ComparisonOp):
-    def _op(self, a, b):
+    def _op(self, a, b) -> bool:
         return a <= b
