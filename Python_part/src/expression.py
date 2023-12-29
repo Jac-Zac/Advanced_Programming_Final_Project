@@ -1,15 +1,20 @@
 # Jacopo Zacchigna ...
 from abc import ABC, abstractmethod
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from .utils.exception import *
 from .utils.stack import Stack
+
+# Review the path about class methods
 
 
 class Expression(ABC):
     """
     Abstract base class for expressions.
     """
+
+    # Since there is only on dispatch
+    __slots__ = ["_dispatch"]
 
     def __init__(self):
         if type(self) is Expression:
@@ -19,27 +24,29 @@ class Expression(ABC):
     def from_program(cls, text: str, dispatch: Dict[str, "Operation"]) -> "Expression":
         """
         Parses a program text into an Expression object.
-
-        Args:
-            text (str): The program text to parse.
-            dispatch (Dict[str, 'Operation']): A mapping from operation symbols to Operation classes.
-
-        Returns:
-            Expression: The parsed Expression object.
-
-        Raises:
-            ValueError: If an unknown instruction is encountered.
         """
-        cls._dispatch = dispatch
-        expression_stack = Stack()
+        cls.__validate_dispatch(dispatch)
+        cls._dispatch = dispatch  # Set the dispatch table for this instance
+        tokens = text.split()
+        return cls.__process_tokens(tokens, dispatch).pop()
 
-        for token in text.split():
-            if token in cls._dispatch:
+    @staticmethod
+    def __validate_dispatch(dispatch):
+        if not dispatch:
+            raise ValueError("Dispatch table cannot be empty")
+
+    @staticmethod
+    def __process_tokens(tokens: List[str], dispatch) -> Stack:
+        expression_stack = Stack()
+        for token in tokens:
+            if token in dispatch:
                 operation_class = dispatch[token]
-                # Make some comment hear KSJDHLhdKLHD
+
+                # Handle 'nop' operation specially; it takes no arguments
                 if token == "nop":
                     expression_stack.push(operation_class(None))
                 else:
+                    # For other operations, pop their arguments from the stack
                     arguments = [
                         expression_stack.pop() for _ in range(operation_class.arity)
                     ]
@@ -50,9 +57,9 @@ class Expression(ABC):
             elif token.isalpha():
                 expression_stack.push(Variable(token))
             else:
-                raise UnknownTokenException(f"Unknown istruction: {token}")
+                raise UnknownTokenException(f"Unknown instruction: {token}")
 
-        return expression_stack.pop()
+        return expression_stack
 
     @abstractmethod
     def evaluate(self, env: Dict[str, Any]):

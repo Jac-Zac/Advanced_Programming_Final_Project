@@ -15,7 +15,6 @@ class Alloc(UnaryMixin, Instruction):
     def evaluate(self, env: Dict[str, Any]) -> None:
         variable_name = str(self._args[0])
         env[variable_name] = 0
-        return None
 
 
 class Valloc(BinaryMixin, Instruction):
@@ -36,7 +35,6 @@ class Valloc(BinaryMixin, Instruction):
             raise ValueError("Array size must be a non-negative integer")
 
         env[variable_name] = [0] * size
-        return None
 
 
 class Setq(BinaryMixin, Instruction):
@@ -48,8 +46,7 @@ class Setq(BinaryMixin, Instruction):
     """
 
     def evaluate(self, env: Dict[str, Any]) -> Any:
-        variable_name = str(self._args[0])
-        new_value = self._args[1].evaluate(env)
+        variable_name, new_value = str(self._args[0]), self._args[1].evaluate(env)
         env[variable_name] = new_value
         return new_value
 
@@ -63,14 +60,20 @@ class Setv(TernaryMixin, Instruction):
     """
 
     def evaluate(self, env: Dict[str, Any]) -> Any:
-        array_name = str(self._args[0])  # String that represent the variable name
-        new_value = self._args[2].evaluate(env)  # Evaluate to get the new value
-        index = self._args[1].evaluate(env)  # Evaluate to get the index
+        array_name, index, new_value = (
+            str(self._args[0]),
+            self._args[1].evaluate(env),
+            self._args[2].evaluate(env),
+        )
 
-        if not isinstance(env[array_name], list):
-            raise ValueError(f"Variable {array_name} is not an array")
-        if not 0 <= index < len(env[array_name]):
-            raise IndexError(f"Index {index} out of bounds for array {array_name}")
+        self._validate_array_access(env, array_name, index)
 
         env[array_name][index] = new_value
         return new_value
+
+    @staticmethod
+    def _validate_array_access(env: Dict[str, Any], array_name: str, index: int):
+        if not isinstance(env.get(array_name), list):
+            raise ValueError(f"Variable {array_name} is not an array")
+        if not 0 <= index < len(env[array_name]):
+            raise IndexError(f"Index {index} out of bounds for array {array_name}")

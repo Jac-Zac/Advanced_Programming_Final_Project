@@ -26,7 +26,7 @@ class Call(Instruction, UnaryMixin):
     Calls a subroutine associated with a given variable name.
     """
 
-    def evaluate(self, env: Dict[str, Any]) -> Any:
+    def evaluate(self, env: Dict[str, Any]):
         variable_name = str(self._args[0])
 
         if variable_name not in env:

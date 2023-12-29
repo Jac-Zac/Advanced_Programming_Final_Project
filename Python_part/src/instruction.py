@@ -12,7 +12,7 @@ class Instruction(Expression):
 
     @abstractmethod
     def evaluate(self, env: Dict[str, Any]) -> Any:
-        raise NotImplemented
+        raise NotImplementedError()
 
     def _op(self, *args):
         pass
@@ -47,7 +47,7 @@ class Print(UnaryMixin, Instruction):
     Evaluates an expression and prints the result.
     """
 
-    def evaluate(self, env: Dict[str, Any]) -> Any:
+    def evaluate(self, env: Dict[str, Any]) -> Expression:
         expression = self._args[0]
 
         # Evaluate the expression and print its result
@@ -76,6 +76,7 @@ class Operation(Instruction):
         evaluated_args = [arg.evaluate(env) for arg in self._args]
         return self._op(*evaluated_args)
 
+    @abstractmethod
     def _op(self, *args) -> Any:
         pass
 
@@ -134,10 +135,6 @@ class ComparisonOp(BinaryMixin, Operation):
     """
     Base class for comparison Instructions.
     """
-
-    @abstractmethod
-    def _op(self, a, b):
-        raise NotImplementedError()
 
 
 class Greater(ComparisonOp):

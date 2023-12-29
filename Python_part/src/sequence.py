@@ -14,7 +14,7 @@ class ProgN(Instruction):
         args (list): A list of expressions to be evaluated in reverse order.
     """
 
-    def evaluate(self, env: Dict[str, Any]) -> Any:
+    def evaluate(self, env: Dict[str, Any]):
         if not self._args:
             raise ValueError("ProgN requires at least one argument")
 
