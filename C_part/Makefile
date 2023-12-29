@@ -56,13 +56,13 @@ SIMD_FLAGS = -DSIMD
 HEADERS = ${wildcard *.h}
 OBJECTS = main.o pgm.o mandelbrot.o 
 
-all: main
+all: mandelbrot
 
-main: ${OBJECTS} ${HEADERS}
+mandelbrot: ${OBJECTS} ${HEADERS}
 	${CC} ${CFLAGS} -o $@ ${OBJECTS}
 
 simd: CFLAGS += ${SIMD_FLAGS}
-simd: main
+simd: mandelbrot
 
 %.o: %.c ${HEADERS}
 	${CC} ${CFLAGS} -c $<
@@ -70,4 +70,4 @@ simd: main
 .PHONY: clean
 
 clean:
-	rm -f *.o main *.pgm
+	rm -f *.o mandelbrot *.pgm
