@@ -58,22 +58,22 @@ v4si mandelbrot_point_calc(v4sf x0, v4sf y0, const int max_iter) {
     y2 = y * y;
 
     // For some reason it doesn't skip much
-    // // Periodicity Check to get if it is different
-    // period_mask_real = -(v4si)(old_position_real == x);
-    // period_mask_imag = -(v4si)(old_position_imag == y);
-    //
-    // if ((period_mask_real[0] != 0 && period_mask_imag[0] != 0) ||
-    //     (period_mask_real[1] != 0 && period_mask_imag[1] != 0) ||
-    //     (period_mask_imag[2] != 0 && period_mask_real[2] != 0) ||
-    //     (period_mask_real[3] != 0 && period_mask_imag[3] != 0)) {
-    //   printf("Skipping \n");
-    //   return (v4si){max_iter, max_iter, max_iter, max_iter};
-    // }
-    //
-    // if (period % PERIOD == 0) {
-    //   old_position_real = x;
-    //   old_position_imag = y;
-    // }
+    // Periodicity Check to get if it is different
+    period_mask_real = -(v4si)(old_position_real == x);
+    period_mask_imag = -(v4si)(old_position_imag == y);
+
+    if ((period_mask_real[0] != 0 && period_mask_imag[0] != 0) ||
+        (period_mask_real[1] != 0 && period_mask_imag[1] != 0) ||
+        (period_mask_imag[2] != 0 && period_mask_real[2] != 0) ||
+        (period_mask_real[3] != 0 && period_mask_imag[3] != 0)) {
+      printf("Skipping \n");
+      return (v4si){max_iter, max_iter, max_iter, max_iter};
+    }
+
+    if (period % PERIOD == 0) {
+      old_position_real = x;
+      old_position_imag = y;
+    }
 
     // Increment result for points that have not escaped
     result += (v4si){mask[0], mask[1], mask[2], mask[3]};

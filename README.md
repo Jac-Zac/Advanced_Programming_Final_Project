@@ -43,41 +43,36 @@ This project involves creating a C program to generate the Mandelbrot fractal as
 
   Detailed mathematical background and algorithmic approach are outlined in the accompanying documentation (project_c.pdf).
 
-# Python part:
+## Python part:
 
-# TO REVIEW
+#### Overview
 
-Overview
+This section of the project focuses on _brief description of what the Python part does, e.g., testing, implementing certain functionalities, etc._
 
-This section of the project focuses on [brief description of what the Python part does, e.g., testing, implementing certain functionalities, etc.].
-Installation and Setup
+- ###### Installation and Setup
 
-    Ensure Python [version] is installed.
-    Install dependencies using:
+  Ensure Python [version] is installed.
+  Install dependencies using:
 
-    bash
-
+  ```bash
     pip install -r requirements.txt
+  ```
 
-Running Tests
+- ###### Running Tests
 
-    Execute the tests with:
+  Execute the tests with:
 
-    bash
+  ```bash
+  pytest
+  ```
 
-    pytest
+- ###### Python Files Description
 
-Python Files Description
-
-    condition.py: [Description of what this file does]
-    control_flow.py: [Description]
-    definition.py: [Description]
+  - `condition.py`: [Description of what this file does]
+  - `control_flow.py`: [Description]
+  - `definition.py`: [Description]
     ... [and so on for each Python file]
 
-Dependencies
+- ###### Dependencies
 
-    List any external libraries or frameworks used.
-
-Notes
-
-    [Any additional information, notes, or special instructions]
+  List any external libraries or frameworks used.
