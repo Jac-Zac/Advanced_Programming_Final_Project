@@ -59,17 +59,22 @@ v4si mandelbrot_point_calc(v4sf x0, v4sf y0, const int max_iter) {
 
     // For some reason it doesn't skip much
     // Periodicity Check to get if it is different
-    period_mask_real = -(v4si)(old_position_real == x);
-    period_mask_imag = -(v4si)(old_position_imag == y);
 
-    if ((period_mask_real[0] != 0 && period_mask_imag[0] != 0) ||
-        (period_mask_real[1] != 0 && period_mask_imag[1] != 0) ||
-        (period_mask_imag[2] != 0 && period_mask_real[2] != 0) ||
-        (period_mask_real[3] != 0 && period_mask_imag[3] != 0)) {
-      printf("Skipping \n");
+    // Almost-equality check
+    period_mask_real = (v4si)(old_position_real == x);
+    // -old_position_real - x < epsilon);
+    period_mask_imag = (v4si)(old_position_imag == y);
+    // -old_position_imag - y < epsilon);
+
+    if ((period_mask_real[0] != 0 || period_mask_real[1] != 0 ||
+         period_mask_real[2] != 0 || period_mask_real[3] != 0) &&
+        (period_mask_imag[0] != 0 || period_mask_imag[1] != 0 ||
+         period_mask_imag[2] != 0 || period_mask_imag[3] != 0)) {
+      printf("All elements are set to 1\n");
       return (v4si){max_iter, max_iter, max_iter, max_iter};
     }
 
+    // Update every period
     if (period % PERIOD == 0) {
       old_position_real = x;
       old_position_imag = y;
