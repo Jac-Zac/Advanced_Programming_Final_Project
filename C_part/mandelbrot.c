@@ -33,58 +33,51 @@ v4si mandelbrot_point_calc(v4sf x0, v4sf y0, const int max_iter) {
   v4sf radius_squared = {RADIUS_SQUARED, RADIUS_SQUARED, RADIUS_SQUARED,
                          RADIUS_SQUARED};
 
-  // Result
-  v4si result = {0};
-
-  // Masks
-  v4si mask = {-1, -1, -1, -1}, period_mask_real = {0, 0, 0, 0},
-       period_mask_imag = {0, 0, 0, 0};
+  // Result and Masks
+  v4si result = {0, 0, 0, 0};
+  v4si mask = {-1, -1, -1, -1};
+  v4si period_mask_real = {0, 0, 0, 0}, period_mask_imag = {0, 0, 0, 0};
 
   int period = 0;
 
   for (int i = 0; i < max_iter; i++) {
-    // Update the mask which is reversed for some reason so I flip it
-    mask = -(v4si)((v4sf)(x2 + y2) < radius_squared);
+    // Update mask: true (-1) for points within the escape radius
+    mask = -(v4si)((x2 + y2) < radius_squared);
 
-    // Break if all points have escaped thus are equal to zero and thus not true
-    if (!mask[0] && !mask[1] && !mask[2] && !mask[3]) {
+    // Break if all points have escaped
+    if (mask[0] == 0 && mask[1] == 0 && mask[2] == 0 && mask[3] == 0) {
       break;
     }
 
+    // Mandelbrot iteration
     y = (2.0f * x * y) + y0;
     x = x2 - y2 + x0;
-
     x2 = x * x;
     y2 = y * y;
 
-    // For some reason it doesn't skip much
-    // Periodicity Check to get if it is different
-
-    // Almost-equality check
+    // Periodicity Check (uncommented and enabled)
     period_mask_real = (v4si)(old_position_real == x);
-    // -old_position_real - x < epsilon);
     period_mask_imag = (v4si)(old_position_imag == y);
-    // -old_position_imag - y < epsilon);
 
-    if ((period_mask_real[0] != 0 || period_mask_real[1] != 0 ||
-         period_mask_real[2] != 0 || period_mask_real[3] != 0) &&
-        (period_mask_imag[0] != 0 || period_mask_imag[1] != 0 ||
-         period_mask_imag[2] != 0 || period_mask_imag[3] != 0)) {
-      printf("All elements are set to 1\n");
+    // Check if all elements in period_mask are set to 1
+    if ((period_mask_real[0] != 0 && period_mask_real[1] != 0 &&
+         period_mask_real[2] != 0 && period_mask_real[3] != 0) &&
+        (period_mask_imag[0] != 0 && period_mask_imag[1] != 0 &&
+         period_mask_imag[2] != 0 && period_mask_imag[3] != 0)) {
       return (v4si){max_iter, max_iter, max_iter, max_iter};
     }
 
-    // Update every period
+    // Update old positions every period
     if (period % PERIOD == 0) {
       old_position_real = x;
       old_position_imag = y;
     }
 
-    // Increment result for points that have not escaped
-    result += (v4si){mask[0], mask[1], mask[2], mask[3]};
-  }
+    period++;
 
-  return result;
+    // Increment result for points that have not escaped
+    result += mask;
+  }
 
   return result;
 }

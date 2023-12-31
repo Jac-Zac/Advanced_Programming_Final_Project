@@ -51,7 +51,7 @@
 
 CC = gcc
 # CFLAGS = -O3 -fopenmp -march=native -std=c17 -Wall -pedantic
-CFLAGS = -O3 -g -fopenmp -march=native -std=c17 -Wall -pedantic -fopt-info-missed 
+CFLAGS = -O3 -g -fopenmp -march=native -std=c17 -Wall -pedantic -fopt-info-missed
 SIMD_FLAGS = -DSIMD
 HEADERS = ${wildcard *.h}
 OBJECTS = main.o pgm.o mandelbrot.o 
