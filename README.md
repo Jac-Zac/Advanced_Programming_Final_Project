@@ -60,39 +60,34 @@ This section of the project focuses on _brief description of what the Python par
 - ###### Python Files Description
 
 ```bash
- .
-├──  src
-│   ├──  utils
-│   │   ├── 󰌠 __pycache__
-│   │   │   ├──  __init__.cpython-311.pyc
-│   │   │   ├──  exception.cpython-311.pyc
-│   │   │   ├──  mixins.cpython-311.pyc
-│   │   │   └──  stack.cpython-311.pyc
-│   │   ├──  __init__.py
-│   │   ├──  exception.py
-│   │   ├──  mixins.py
-│   │   └──  stack.py
-│   ├──  __init__.py
-│   ├──  condition.py
-│   ├──  control_flow.py
-│   ├──  definition.py
-│   ├──  expression.py
-│   ├──  instruction.py
-│   ├──  sequence.py
-│   └──  subroutine.py
-├──  test
-│   ├──  __init__.py
-│   ├──  test_comparisons.py
-│   ├──  test_conditionals.py
-│   ├──  test_control_flow.py
-│   ├──  test_definitions.py
-│   ├──  test_exercise_requirements.py
-│   ├──  test_print_nop.py
-│   ├──  test_sequences.py
-│   ├──  test_subroutine.py
-│   └──  test_teacher.py
-├──  instructions.pdf
-└──  main.py
+.
+├── src
+│   ├── utils
+│   │   ├── __init__.py
+│   │   ├── exception.py
+│   │   ├── mixins.py
+│   │   └── stack.py
+│   ├── __init__.py
+│   ├── condition.py
+│   ├── control_flow.py
+│   ├── definition.py
+│   ├── expression.py
+│   ├── instruction.py
+│   ├── sequence.py
+│   └── subroutine.py
+├── test
+│   ├── __init__.py
+│   ├── test_comparisons.py
+│   ├── test_conditionals.py
+│   ├── test_control_flow.py
+│   ├── test_definitions.py
+│   ├── test_exercise_requirements.py
+│   ├── test_print_nop.py
+│   ├── test_sequences.py
+│   ├── test_subroutine.py
+│   └── test_teacher.py
+├── instructions.pdf
+└── main.py
 ```
 
 - `condition.py`: Handles conditional logics
