@@ -12,6 +12,7 @@ if __name__ == "__main__":
         "call": Call,
         "print": Print,
         "nop": Nop,
+        "sleep": Sleep,
         "+": Addition,
         "*": Multiplication,
         "-": Subtraction,

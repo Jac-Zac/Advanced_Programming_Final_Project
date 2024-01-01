@@ -7,11 +7,8 @@ from .utils.mixins import (BinaryMixin, QuaternaryMixin, TernaryMixin,
 
 class ProgN(Instruction):
     """
-    Executes a sequence of operations in reverse order (due to stack behavior in Polish notation)
-    and returns the value of what was originally the first operation.
-
-    Attributes:
-        args (list): A list of expressions to be evaluated in reverse order.
+    Base class for prog of N operations
+    Executes a sequence of operations in reverse order and returns the value of what was originally the first operation.
     """
 
     def evaluate(self, env: Dict[str, Any]):

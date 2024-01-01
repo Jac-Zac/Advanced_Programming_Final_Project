@@ -1,5 +1,4 @@
 # CC = gcc
-# # CC = clang
 # LIB_NAME = libmandelbrot
 # SHARED ?= 0
 # DEBUG ?= 0
@@ -17,15 +16,18 @@
 # ifeq ($(DEBUG),1)
 # 	CFLAGS += -g -Wall -Wextra -O0
 # else
-# 	CFLAGS += -O2
+# 	CFLAGS += -O3 -g -fopenmp -march=native -std=c17 -Wall -pedantic -fopt-info-missed
 # endif
+#
+# VECTORIZATION_FLAGS = -DGCC_EXTENSIONS
 #
 # # Source files
 # SRCS = $(wildcard *.c)
 # OBJS = $(SRCS:.c=.o)
+# HEADERS = $(wildcard *.h)
 #
 # # Targets lib and main
-# all: $(LIB) main
+# all: $(LIB) mandelbrot
 #
 # $(LIB): $(OBJS)
 # ifeq ($(SHARED),1)
@@ -34,25 +36,28 @@
 # 	ar rcs $@ $^
 # endif
 #
-# main: main.c $(LIB)
-# 	$(CC) $(CFLAGS) -o $@ $< -L. -libmandelbrot
+# mandelbrot: $(OBJS) $(HEADERS)
+# 	$(CC) $(CFLAGS) -o $@ $(OBJS)
 #
-# %.o: %.c
+# vectorized: CFLAGS += $(VECTORIZATION_FLAGS)
+# vectorized: mandelbrot
+#
+# %.o: %.c $(HEADERS)
 # 	@$(CC) $(CFLAGS) -c $< -o $@
 #
 # clean:
-# 	rm -f *.o main
+# 	rm -f *.o *.pgm mandelbrot
 #
 # # Delete everything, might be useful
 # clean_all:
-# 	rm -f *.o $(LIB) $(LIB_NAME).a $(LIB_NAME).so main
-# 	rm -rf main.dSYM
+# 	rm -f *.o $(LIB) $(LIB_NAME).a $(LIB_NAME).so mandelbrot
+# 	rm -rf mandelbrot.dSYM
 #
-
 CC = gcc
 # CFLAGS = -O3 -fopenmp -march=native -std=c17 -Wall -pedantic
 CFLAGS = -O3 -g -fopenmp -march=native -std=c17 -Wall -pedantic -fopt-info-missed
-SIMD_FLAGS = -DSIMD
+VECTORIZATION_FLAGS = -DGCC_EXTENSIONS
+
 HEADERS = ${wildcard *.h}
 OBJECTS = main.o pgm.o mandelbrot.o 
 
@@ -61,8 +66,8 @@ all: mandelbrot
 mandelbrot: ${OBJECTS} ${HEADERS}
 	${CC} ${CFLAGS} -o $@ ${OBJECTS}
 
-simd: CFLAGS += ${SIMD_FLAGS}
-simd: mandelbrot
+vectorized: CFLAGS += ${VECTORIZATION_FLAGS}
+vectorized: mandelbrot
 
 %.o: %.c ${HEADERS}
 	${CC} ${CFLAGS} -c $<

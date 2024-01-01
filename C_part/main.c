@@ -12,7 +12,9 @@
 
 int main(int argc, char *argv[]) {
   if (argc != 4) {
-    printf("Usage: %s <file_name> <max_iterations> <n_rows>\n", argv[0]);
+    fprintf(stderr, "Error: Invalid arguments.\n");
+    fprintf(stderr, "Usage: %s <file_name> <max_iterations> <n_rows>\n",
+            argv[0]);
     return WARNING;
   }
 
@@ -32,11 +34,11 @@ int main(int argc, char *argv[]) {
 
   double ms = (end - start) * 1000;
 
-#ifdef SIMD
+#ifdef GCC_EXTENSIONS
   printf(
       "\033[1;33mUsing version with GCC extensions\n\033[0m"); // Yellow color
-#elif __ARM_NEON
-  printf("\033[1;31mUsing Neon version\n\033[0m"); // Green color
+// #elif __ARM_NEON
+//   printf("\033[1;31mUsing Neon version\n\033[0m"); // Green color
 #else
   printf("\033[1;32mUsing default version\n\033[0m"); // Green color
 #endif

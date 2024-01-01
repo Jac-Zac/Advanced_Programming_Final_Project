@@ -1,4 +1,5 @@
 # Jacopo Zacchigna
+import time
 from abc import abstractmethod
 from typing import Any, Dict, List
 
@@ -7,6 +8,10 @@ from .utils.mixins import BinaryMixin, NullMixin, UnaryMixin
 
 
 class Instruction(Expression):
+    """
+    Abstract Class for a general instruction
+    """
+
     def __init__(self, args: List[Expression]):
         self._args = args
 
@@ -42,6 +47,16 @@ class Nop(NullMixin, Instruction):
         return f"nop"
 
 
+class Sleep(UnaryMixin, Instruction):
+    """
+    Sleep for n seconds based on the evaluation of the previous argument
+    """
+
+    def evaluate(self, env: Dict[str, Any]) -> None:
+        # Sleep for the amount that is obtained by the evaluation of the expr
+        time.sleep(self._args[0].evaluate(env))
+
+
 class Print(UnaryMixin, Instruction):
     """
     Evaluates an expression and prints the result.
@@ -60,18 +75,13 @@ class Print(UnaryMixin, Instruction):
 
 
 class Operation(Instruction):
+    """
+    Specific type of instructions that involve arithmetical logic
+    """
+
     def evaluate(self, env: Dict[str, Any]) -> Any:
         """
-        Evaluate the Operation in a given Expression
-
-        This method processes each argument of the Operation by evaluating them recursively until we meat a variable or a constant.
-        It then applies the operation defined in the 'op' method to these evaluated arguments.
-
-        Parameters:
-        env (Dict[str, Any]): The environment for variable evaluation.
-
-        Returns:
-        Any: The result of the evaluation.
+        Evaluate all of the args and then apply the operation to all of them
         """
         evaluated_args = [arg.evaluate(env) for arg in self._args]
         return self._op(*evaluated_args)

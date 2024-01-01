@@ -73,6 +73,10 @@ class Expression(ABC):
 
 
 class Variable(Expression):
+    """
+    Single variable with corresponding value (one of the base expressions)
+    """
+
     def __init__(self, name: str):
         self._name = name
 
@@ -87,6 +91,10 @@ class Variable(Expression):
 
 
 class Constant(Expression):
+    """
+    Single constant (one of the base expressions)
+    """
+
     def __init__(self, value):
         self._value = value
 

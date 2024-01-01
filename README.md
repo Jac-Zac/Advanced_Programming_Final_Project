@@ -49,15 +49,6 @@ This project involves creating a C program to generate the Mandelbrot fractal as
 
 This section of the project focuses on _brief description of what the Python part does, e.g., testing, implementing certain functionalities, etc._
 
-- ###### Installation and Setup
-
-  Ensure Python [version] is installed.
-  Install dependencies using:
-
-  ```bash
-    pip install -r requirements.txt
-  ```
-
 - ###### Running Tests
 
   Execute the tests with:
@@ -68,10 +59,51 @@ This section of the project focuses on _brief description of what the Python par
 
 - ###### Python Files Description
 
-  - `condition.py`: [Description of what this file does]
-  - `control_flow.py`: [Description]
-  - `definition.py`: [Description]
-    ... [and so on for each Python file]
+```bash
+ .
+├──  src
+│   ├──  utils
+│   │   ├── 󰌠 __pycache__
+│   │   │   ├──  __init__.cpython-311.pyc
+│   │   │   ├──  exception.cpython-311.pyc
+│   │   │   ├──  mixins.cpython-311.pyc
+│   │   │   └──  stack.cpython-311.pyc
+│   │   ├──  __init__.py
+│   │   ├──  exception.py
+│   │   ├──  mixins.py
+│   │   └──  stack.py
+│   ├──  __init__.py
+│   ├──  condition.py
+│   ├──  control_flow.py
+│   ├──  definition.py
+│   ├──  expression.py
+│   ├──  instruction.py
+│   ├──  sequence.py
+│   └──  subroutine.py
+├──  test
+│   ├──  __init__.py
+│   ├──  test_comparisons.py
+│   ├──  test_conditionals.py
+│   ├──  test_control_flow.py
+│   ├──  test_definitions.py
+│   ├──  test_exercise_requirements.py
+│   ├──  test_print_nop.py
+│   ├──  test_sequences.py
+│   ├──  test_subroutine.py
+│   └──  test_teacher.py
+├──  instructions.pdf
+└──  main.py
+```
+
+- `condition.py`: Handles conditional logics
+- `control_flow.py`: the control flow.
+- `definition.py`:
+- `expression.py`:
+- `instruction.py`:
+- `sequence.py`:
+- `subroutine.py`:
+- `main.py`: The main script that orchestrates the execution of the project.
+- `test_teacher.py`: Contains test cases for verifying the functionality of the project
 
 - ###### Dependencies
 
