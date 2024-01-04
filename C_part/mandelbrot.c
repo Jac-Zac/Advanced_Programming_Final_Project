@@ -37,7 +37,8 @@ v4si mandelbrot_point_calc(v4sf x0, v4sf y0, const int max_iter) {
 
   int period = 0;
 
-  for (int i = 0; i < max_iter; i++) {
+  int i = 0;
+  while (i < max_iter) {
     // Update mask: true (-1) for points within the escape radius
     mask = -(v4si)((x2 + y2) < radius_squared);
 
@@ -70,11 +71,11 @@ v4si mandelbrot_point_calc(v4sf x0, v4sf y0, const int max_iter) {
       old_position_real = x;
       old_position_imag = y;
     }
-
     period++;
 
     // Increment result for points that have not escaped
     result += mask;
+    i++;
   }
 
   return result;
@@ -175,7 +176,7 @@ int mandelbrot_point_calc(float x0, float y0, const int max_iter) {
     float old_position_real = 0.0, old_position_imag = 0.0;
 
     // implement the function iteratively
-    unsigned int i = 0;
+    int i = 0;
     while (i < max_iter) {
       // check if radius distance is greater or equal to the radius
       if ((x_squared + y_squared) >= RADIUS_SQUARED) {

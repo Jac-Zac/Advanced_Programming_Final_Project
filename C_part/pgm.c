@@ -75,27 +75,27 @@ int create_image(const char *file_name, const int max_iter, const int n_rows) {
 
 #define NUM_PIXELS 4
 
-  float y_normalization = 2.0 / ((float)image.height - 1.0);
-  float x_normalization = (3.0 / ((float)image.width - 1.0));
+  float y_normalization = 2.0f / ((float)image.height - 1.0f);
+  float x_normalization = (3.0f / ((float)image.width - 1.0f));
 
-  // Parallel computation using OpenMP
+// Parallel computation using OpenMP
 #pragma omp parallel for schedule(dynamic)
   for (int y = 0; y <= image.height / 2; y += 4) {
-    v4sf imag = {y * y_normalization - 1.0, (y + 1) * y_normalization - 1.0,
-                 (y + 2) * y_normalization - 1.0,
-                 (y + 3) * y_normalization - 1.0};
+    v4sf imag = {y * y_normalization - 1.0f, (y + 1) * y_normalization - 1.0f,
+                 (y + 2) * y_normalization - 1.0f,
+                 (y + 3) * y_normalization - 1.0f};
 
     for (int x = 0; x < image.width; x++) {
       float reals = x * x_normalization - 2.0;
       v4sf real = (v4sf){reals, reals, reals, reals};
 
       // Compute the symmetric part together
-      char *pixel[NUM_PIXELS] = {
+      char *restrict pixel[NUM_PIXELS] = {
           pixel_at(&image, x, y), pixel_at(&image, x, y + 1),
           pixel_at(&image, x, y + 2), pixel_at(&image, x, y + 3),
           pixel_at(&image, x, y + 4)};
 
-      char *pixel_symmetric[NUM_PIXELS] = {
+      char *restrict pixel_symmetric[NUM_PIXELS] = {
           pixel_at(&image, x, image.height - y - 1),
           pixel_at(&image, x, image.height - y - 2),
           pixel_at(&image, x, image.height - y - 3),

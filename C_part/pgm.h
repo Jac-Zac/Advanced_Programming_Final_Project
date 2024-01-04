@@ -9,7 +9,8 @@ struct _netpbm_image {
   int height;
   int offset;
   int size;
-  char *data;
+  char *data __attribute__((
+      aligned(16))); // Assuming `data` is the image pixel storage
   FILE *fd;
 };
 
