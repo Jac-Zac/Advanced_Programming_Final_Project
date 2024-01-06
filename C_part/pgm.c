@@ -92,8 +92,7 @@ int create_image(const char *file_name, const int max_iter, const int n_rows) {
       // Compute the symmetric part together
       char *restrict pixel[NUM_PIXELS] = {
           pixel_at(&image, x, y), pixel_at(&image, x, y + 1),
-          pixel_at(&image, x, y + 2), pixel_at(&image, x, y + 3),
-          pixel_at(&image, x, y + 4)};
+          pixel_at(&image, x, y + 2), pixel_at(&image, x, y + 3)};
 
       char *restrict pixel_symmetric[NUM_PIXELS] = {
           pixel_at(&image, x, image.height - y - 1),
