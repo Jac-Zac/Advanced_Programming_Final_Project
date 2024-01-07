@@ -1,4 +1,4 @@
-# Jacopo Zacchigna .....
+# Jacopo Zacchinga SM3201293
 from typing import Any
 
 from .exception import *

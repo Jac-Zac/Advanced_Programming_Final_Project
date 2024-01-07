@@ -1,4 +1,4 @@
-# Jacopo Zacchigna ...
+# Jacopo Zacchinga SM3201293
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List
 

@@ -1,12 +1,11 @@
+# Jacopo Zacchinga SM3201293
 import sys
 
 sys.path.append("src/")
 
 from src.control_flow import *
 from src.definition import (  # Assuming these are defined for setting and allocating variables
-    Alloc,
-    Setq,
-)
+    Alloc, Setq)
 from src.expression import Expression
 from src.instruction import *
 

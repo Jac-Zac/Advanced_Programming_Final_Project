@@ -1,4 +1,4 @@
-# Jacopo Zacchigna .....
+# Jacopo Zacchinga SM3201293
 class EmptyStackException(Exception):
     """Exception raised when popping from an empty stack."""
 
