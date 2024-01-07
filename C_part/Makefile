@@ -1,3 +1,4 @@
+# Jacopo Zacchinga SM3201293
 CC = gcc
 DEBUG ?= 0
 
@@ -38,25 +39,3 @@ clean:
 .PHONY: clean_all
 clean_all:
 	rm -f *.o *.pgm mandelbrot
-
-# CC = gcc
-# VECTORIZATION_FLAGS = -DGCC_EXTENSIONS
-#
-# HEADERS = ${wildcard *.h}
-# OBJECTS = main.o pgm.o mandelbrot.o 
-#
-# all: mandelbrot
-#
-# mandelbrot: ${OBJECTS} ${HEADERS}
-# 	${CC} ${CFLAGS} -o $@ ${OBJECTS}
-#
-# vectorized: CFLAGS += ${VECTORIZATION_FLAGS}
-# vectorized: mandelbrot
-#
-# %.o: %.c ${HEADERS}
-# 	${CC} ${CFLAGS} -c $<
-#
-# .PHONY: clean
-#
-# clean:
-# 	rm -f *.o mandelbrot *.pgm
