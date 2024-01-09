@@ -11,10 +11,14 @@ This project involves creating a C program to generate the Mandelbrot fractal as
   Ensure you have a C compiler installed (e.g., GCC).
   Use the provided Makefile for compilation.
 
-  It can be compiled with
+###### It can be compiled with
 
-  - `Make` : for the non SIMD version
-  - `Make simd` : for the non SIMD version
+- `Make` : for to get a release version of the code
+- `Make vectorized` : for the version that uses GCC extensions
+- `Make DEBUG=1`: to run in debug version with also info on the time it took
+- `Make OPTIMIZATION=-Ox`: to set what optimization we want to use the default is 3
+
+You can remove anything which is not relevant with `make clean` and `make clean_all` if you also want to remove the generated image
 
 - ##### Running the Program
 
@@ -26,8 +30,15 @@ This project involves creating a C program to generate the Mandelbrot fractal as
 
   > Example: `./mandelbrot fractal.pgm 1000 1000`
 
-  You can also directly pipe it into the kitty terminal if you have that by doing something like this: `./mandelbrot fractal.pgm 1000 1000 && icat test.pgm`
-  `
+    <details>
+      <summary>More tips</summary>
+        You can also directly pipe it into the kitty terminal if you have that by doing something like this:
+
+  ```bash
+  ./mandelbrot fractal.pgm 1000 1000 && icat test.pgm
+  ```
+
+    </details>
 
 - ##### Implementation Details
 
@@ -49,17 +60,17 @@ This project involves creating a C program to generate the Mandelbrot fractal as
 
 This section of the project focuses on _brief description of what the Python part does, e.g., testing, implementing certain functionalities, etc._
 
-- ###### Running Tests
+###### Running Tests
 
-  Execute the tests with:
-
-  ```bash
-  pytest
-  ```
-
-- ###### Python Files Description
+You can simply run all of the tests by using:
 
 ```bash
+pytest
+```
+
+###### Python Files Description
+
+```
 .
 ├── src
 │   ├── utils
@@ -90,16 +101,20 @@ This section of the project focuses on _brief description of what the Python par
 └── main.py
 ```
 
-- `condition.py`: Handles conditional logics
-- `control_flow.py`: the control flow.
-- `definition.py`:
-- `expression.py`:
-- `instruction.py`:
-- `sequence.py`:
-- `subroutine.py`:
-- `main.py`: The main script that orchestrates the execution of the project.
-- `test_teacher.py`: Contains test cases for verifying the functionality of the project
+#### Testing New Code
 
-- ###### Dependencies
+To test new code in the project, follow these steps:
 
-  List any external libraries or frameworks used.
+1. **Modify the Code**:
+
+   - Open the [`main.py`](Python_part/main.py) file located in the `Python_part` directory.
+   - Make the necessary modifications or additions to the code that you wish to test.
+
+2. **Run the Script**:
+
+   - Ensure you have the required environment set up to run Python scripts. This typically includes having Python installed and any necessary dependencies.
+   - Navigate to the directory containing `main.py` using a terminal or command prompt.
+   - Execute the script by running:
+     ```bash
+     ./main.py
+     ```
