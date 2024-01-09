@@ -11,11 +11,6 @@ int has_pgm_extension(const char *file_name) {
 
 // Function to validate input parameters
 int validate_inputs(int argc, const char *file_name, int max_iter, int n_rows) {
-  if (argc != 4) {
-    fprintf(stderr, "Usage: %s <file_name> <max_iterations> <n_rows>\n",
-            file_name);
-    return INVALID_ARGUMENTS;
-  }
   if (!has_pgm_extension(file_name)) {
     fprintf(stderr, "Error: File name must end with .pgm extension\n");
     return INVALID_FILE_EXTENSION;
@@ -32,6 +27,12 @@ int validate_inputs(int argc, const char *file_name, int max_iter, int n_rows) {
 }
 
 int main(int argc, char *argv[]) {
+  if (argc != 4) {
+    fprintf(stderr, "Usage: %s <file_name> <max_iterations> <n_rows>\n",
+            argv[0]);
+    return INVALID_ARGUMENTS;
+  }
+
   const char *file_name = argv[1];
   const int max_iter = atoi(argv[2]);
   const int n_rows = atoi(argv[3]);

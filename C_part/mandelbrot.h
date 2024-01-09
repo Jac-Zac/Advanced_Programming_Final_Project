@@ -23,7 +23,7 @@
  * @param max_iter Maximum number of iterations.
  * @return Number of iterations to reach escape radius.
  */
-int mandelbrot_point_calc(float x0, float y0, const int max_iter);
+int calculate_mandelbrot_pixel(float x0, float y0, const int max_iter);
 
 #else
 
@@ -33,8 +33,8 @@ int mandelbrot_point_calc(float x0, float y0, const int max_iter);
 
 // Vector of four single-precision floats
 typedef float v4sf __attribute__((vector_size(4 * sizeof(float))));
-// Vector of four single-precision int
+// Vector of four int
 typedef int v4si __attribute__((vector_size(4 * sizeof(int))));
 
-v4si mandelbrot_point_calc(v4sf x0, v4sf y0, const int max_iter);
+v4si calculate_mandelbrot_pixel(v4sf x0, v4sf y0, const int max_iter);
 #endif

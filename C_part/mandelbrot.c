@@ -3,8 +3,7 @@
 
 // Running not vectorized version if GCC_EXTENSIONS is not defined
 #ifndef GCC_EXTENSIONS
-// Iterative implementation of mandelbrot_set -> less stack-frames
-int mandelbrot_point_calc(float x0, float y0, const int max_iter) {
+int calculate_mandelbrot_pixel(float x0, float y0, const int max_iter) {
   // Check if the point is inside the bulb to avoid unnecessary computation
   // reasonably a 3x speedup from this Wikipedia article
   // https://en.wikipedia.org/wiki/Plotting_algorithms_for_the_Mandelbrot_set#Cardioid_/_bulb_checking
@@ -76,8 +75,8 @@ int mandelbrot_point_calc(float x0, float y0, const int max_iter) {
 
 #else
 
-// The mandelbrot_point_calc function rewritten to use GCC vector types
-v4si mandelbrot_point_calc(v4sf x0, v4sf y0, const int max_iter) {
+// The calculate_mandelbrot_pixel function rewritten to use GCC vector types
+v4si calculate_mandelbrot_pixel(v4sf x0, v4sf y0, const int max_iter) {
   // Early Bailout Test for Main Cardioid and Period-2 Bulb
   v4sf q = ((x0 - 0.25f) * (x0 - 0.25f)) + (y0 * y0);
   v4si cardioid_mask = (v4si)((q * (q + (x0 - 0.25f))) <= (0.25f * y0 * y0));
@@ -100,7 +99,6 @@ v4si mandelbrot_point_calc(v4sf x0, v4sf y0, const int max_iter) {
   v4si mask = {-1}, period_mask_real = {0}, period_mask_imag = {0};
 
   int period = 0;
-
   int i = 0;
   while (i < max_iter) {
     // Update mask: true (-1) for points within the escape radius
