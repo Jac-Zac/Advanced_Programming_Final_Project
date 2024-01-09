@@ -14,6 +14,9 @@ class If(TernaryMixin, Instruction):
 
     def evaluate(self, env: Dict[str, Any]) -> Expression:
         condition, true_branch, false_branch = self._args
+        if not isinstance(condition, Expression):
+            raise TypeError("Condition must be an instance of Expression")
+
         return (
             true_branch.evaluate(env)
             if condition.evaluate(env)

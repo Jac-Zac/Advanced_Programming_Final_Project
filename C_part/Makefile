@@ -1,14 +1,17 @@
 # Jacopo Zacchinga SM3201293
 CC = gcc
 DEBUG ?= 0
+OPTIMIZATION = -O3 # Allow user to choose the optimization they want default is O3
 
 # Compiler flags
+CFLAGS = -fopenmp -std=c17 $(OPTIMIZATION)
 ifeq ($(DEBUG),1)
-	CFLAGS += -g -fopenmp -Wall -Wextra -pedantic -O0 -fopt-info-missed -std=c17
+	CFLAGS += -g -Wall -Wextra -pedantic -fopt-info-missed -DDEBUG
 else
-	CFLAGS += -O3 -fopenmp -march=native -std=c17
+	CFLAGS += -march=native
 endif
 
+# GCC extension vectorization
 VECTORIZATION_FLAGS = -DGCC_EXTENSIONS
 
 # Source files

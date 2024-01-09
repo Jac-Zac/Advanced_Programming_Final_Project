@@ -6,18 +6,17 @@
 #include "mandelbrot.h"
 #include "pgm.h"
 
-#define WIDTH_SCALE 1.5
-#define MAX_COLOR 255
-
 int set_image_info(netpbm_ptr img_ptr, const char *file_name,
                    const int n_rows) {
+  // Open the file and create it if doesn't exist
+  // If an error occurs exit and warn the user
   img_ptr->fd = fopen(file_name, "w+");
-
   if (img_ptr->fd == NULL) {
     fprintf(stderr, "Error: Unable to open file %s.\n", file_name);
     return -2;
   }
 
+  // Set image width and hight based on the command line arguments
   img_ptr->height = n_rows;
   img_ptr->width = n_rows * WIDTH_SCALE;
 
@@ -53,7 +52,7 @@ int create_image(const char *file_name, const int max_iter, const int n_rows) {
 
   int err = set_image_info(&image, file_name, n_rows);
 
-  if (err != 0) {
+  if (err != SUCCESS) {
     return err;
   }
 
@@ -63,7 +62,27 @@ int create_image(const char *file_name, const int max_iter, const int n_rows) {
   float y_normalization = 2.0f / ((float)image.height - 1.0f);
   float x_normalization = 3.0f / ((float)image.width - 1.0f);
 
-#ifdef GCC_EXTENSIONS
+#ifndef GCC_EXTENSIONS
+#pragma omp parallel for schedule(dynamic)
+  for (int y = 0; y <= image.height / 2; y++) {
+    // Compute the normalized coordinates
+    float imag = (y * y_normalization) - 1.0;
+    for (int x = 0; x < image.width; x++) {
+      float real = (x * x_normalization) - 2.0;
+
+      // Compute the symmetric part together
+      char *pixel = pixel_at(&image, x, y);
+      // Wasting a bit of time hear
+      char *pixel_symmetric = pixel_at(&image, x, image.height - y - 1);
+
+      int mandelbrot_val = mandelbrot_point_calc(real, imag, max_iter);
+
+      *pixel = MAX_COLOR * log((float)mandelbrot_val) / log_max_iter;
+      *pixel_symmetric = *pixel;
+    }
+  }
+
+#else
 // Number of float we can fit using SIMD instruction to vectorize the code
 #define NUM_PIXELS 4
 
@@ -100,26 +119,6 @@ int create_image(const char *file_name, const int max_iter, const int n_rows) {
         *pixel[i] = MAX_COLOR * (log((float)mandelbrot_val[i]) / log_max_iter);
         *pixel_symmetric[i] = *pixel[i];
       }
-    }
-  }
-#else
-
-#pragma omp parallel for schedule(dynamic)
-  for (int y = 0; y <= image.height / 2; y++) {
-    // Compute the normalized coordinates
-    float imag = (y * y_normalization) - 1.0;
-    for (int x = 0; x < image.width; x++) {
-      float real = (x * x_normalization) - 2.0;
-
-      // Compute the symmetric part together
-      char *pixel = pixel_at(&image, x, y);
-      // Wasting a bit of time hear
-      char *pixel_symmetric = pixel_at(&image, x, image.height - y - 1);
-
-      int mandelbrot_val = mandelbrot_point_calc(real, imag, max_iter);
-
-      *pixel = MAX_COLOR * log((float)mandelbrot_val) / log_max_iter;
-      *pixel_symmetric = *pixel;
     }
   }
 #endif

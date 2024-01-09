@@ -49,6 +49,7 @@ class Setq(BinaryMixin, Instruction):
     def evaluate(self, env: Dict[str, Any]) -> Any:
         variable_name, new_value = str(self._args[0]), self._args[1].evaluate(env)
         env[variable_name] = new_value
+
         return new_value
 
 

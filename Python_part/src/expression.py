@@ -5,8 +5,6 @@ from typing import Any, Dict, List
 from .utils.exception import *
 from .utils.stack import Stack
 
-# Review the path about class methods
-
 
 class Expression(ABC):
     """
