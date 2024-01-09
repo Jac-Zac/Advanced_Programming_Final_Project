@@ -11,6 +11,7 @@ class While(BinaryMixin, Instruction):
     """
 
     def evaluate(self, env: Dict[str, Any]) -> None:
+        # Get stopping condition and body of the loop
         condition, body = self._args
 
         while condition.evaluate(env):
@@ -23,11 +24,15 @@ class For(QuaternaryMixin, Instruction):
     """
 
     def evaluate(self, env: Dict[str, Any]) -> None:
+        # Get the args in the correct order
         loop_var, start, end, body = self._args
 
+        # Evaluate the start and end value
         start_val, end_val = start.evaluate(env), end.evaluate(env)
+        # Get the name for the index of the loop
         loop_var_name = str(loop_var)
 
         for i in range(start_val, end_val):
+            # Update the index value
             env[loop_var_name] = i
             body.evaluate(env)

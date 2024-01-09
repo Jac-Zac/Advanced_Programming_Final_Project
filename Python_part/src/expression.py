@@ -11,7 +11,7 @@ class Expression(ABC):
     Abstract base class for expressions.
     """
 
-    # Since there is only on dispatch
+    # Since there is only on dispatch it is more efficient
     __slots__ = ["_dispatch"]
 
     def __init__(self):
@@ -26,6 +26,8 @@ class Expression(ABC):
         cls.__validate_dispatch(dispatch)
         cls._dispatch = dispatch  # Set the dispatch table for this instance
         tokens = text.split()
+
+        # Pop from the stack the operation
         return cls.__process_tokens(tokens, dispatch).pop()
 
     @staticmethod
@@ -39,21 +41,18 @@ class Expression(ABC):
         for token in tokens:
             if token in dispatch:
                 operation_class = dispatch[token]
+                # Pop their arguments from the stack based on the arity of the operation
+                arguments = [
+                    expression_stack.pop() for _ in range(operation_class.arity)
+                ]
+                # Push the operation to the stack
+                expression_stack.push(operation_class(arguments))
 
-                # Handle 'nop' operation specially; it takes no arguments
-                if token == "nop":
-                    expression_stack.push(operation_class(None))
-                else:
-                    # For other operations, pop their arguments from the stack
-                    arguments = [
-                        expression_stack.pop() for _ in range(operation_class.arity)
-                    ]
-                    expression_stack.push(operation_class(arguments))
-
-            elif token.isdigit():
-                expression_stack.push(Constant(int(token)))
+            # If a variable or a constant deal with it separately
             elif token.isalpha():
                 expression_stack.push(Variable(token))
+            elif token.isdigit():
+                expression_stack.push(Constant(int(token)))
             else:
                 raise UnknownTokenException(f"Unknown instruction: {token}")
 

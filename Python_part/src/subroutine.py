@@ -13,6 +13,7 @@ class DefSub(Instruction, BinaryMixin):
     def evaluate(self, env: Dict[str, Any]) -> None:
         variable_name, subroutine_body = str(self._args[0]), self._args[1]
 
+        # Depends if we want to allow duplicate function names let's avoid it
         if variable_name in env:
             raise ValueError(
                 f"Symbol: {variable_name} already exists in the environment"
@@ -28,13 +29,14 @@ class Call(Instruction, UnaryMixin):
     """
 
     def evaluate(self, env: Dict[str, Any]):
-        variable_name = str(self._args[0])
+        # Get the name
+        function_name = str(self._args[0])
 
-        if variable_name not in env:
+        if function_name not in env:
             raise ValueError(
-                f"Symbol: {variable_name} is not defined in the environment"
+                f"Symbol: {function_name} is not defined in the environment"
             )
 
         # Call the stored subroutine
-        subroutine = env[variable_name]
+        subroutine = env[function_name]
         return subroutine()

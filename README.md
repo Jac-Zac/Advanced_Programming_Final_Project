@@ -60,15 +60,15 @@ You can remove anything which is not relevant with `make clean` and `make clean_
 
 This section of the project focuses on _brief description of what the Python part does, e.g., testing, implementing certain functionalities, etc._
 
-###### Running Tests
+##### Running Tests
 
-You can simply run all of the tests by using:
+You can simply navigate to the Python_part directory and run all of the tests with:
 
 ```bash
 pytest
 ```
 
-###### Python Files Description
+##### Python Files Description
 
 ```
 .

@@ -2,7 +2,8 @@
 from typing import Any, Dict
 
 from .instruction import Instruction
-from .utils.mixins import BinaryMixin, QuaternaryMixin, TernaryMixin, UnaryMixin
+from .utils.mixins import (BinaryMixin, QuaternaryMixin, TernaryMixin,
+                           UnaryMixin)
 
 
 class ProgN(Instruction):
@@ -12,6 +13,7 @@ class ProgN(Instruction):
     """
 
     def evaluate(self, env: Dict[str, Any]):
+        # Prog0 wouldn't really make much sense
         if not self._args:
             raise ValueError("ProgN requires at least one argument")
 

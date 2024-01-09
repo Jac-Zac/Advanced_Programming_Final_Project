@@ -4,7 +4,7 @@
 
 # Mixin classes for arity of instructions
 class NullMixin:
-    arity = 1
+    arity = 0
 
 
 class UnaryMixin:
