@@ -204,10 +204,3 @@ def test_collatz():
     assert (
         collatz_sequence == expected_sequence
     ), "Collatz sequence does not match expected sequence"
-
-
-# if __name__ == "__main__":
-#     test_code_examples()
-#     test_prime_example()
-#     # test_multiplication_table_program()
-#     # test_collatz()

@@ -47,7 +47,3 @@ def test_complex_operators():
     expected_result = True
     result = expression.evaluate(env)
     assert result == expected_result
-
-
-if __name__ == "__main__":
-    pytest.main()

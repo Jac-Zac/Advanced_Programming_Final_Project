@@ -24,7 +24,3 @@ def test_print_nop_operations():
     # Ensure that 'x' is set to 5, and the result is 5 (printed)
     assert env["x"] == 5
     assert result == 5
-
-
-if __name__ == "__main__":
-    test_print_nop_operations()
