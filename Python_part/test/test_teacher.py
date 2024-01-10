@@ -1,5 +1,7 @@
 # Jacopo Zacchinga SM3201293
+import io
 import sys
+from contextlib import redirect_stdout
 
 sys.path.append("src/")
 
@@ -23,6 +25,7 @@ dispatch = {
     "+": Addition,
     "*": Multiplication,
     "-": Subtraction,
+    "/": Division,
     "%": Modulus,
     ">": Greater,
     ">=": GreaterEqual,
@@ -84,9 +87,6 @@ def test_code_examples():
 
 
 def test_prime_example():
-    import io
-    from contextlib import redirect_stdout
-
     # Prime number checker program
     prime_expression = Expression.from_program(
         "nop x print prime if nop 0 0 != prime setq i x % 0 = if 1 x - 2 i for 0 0 = prime setq prime alloc prog4 100 2 x for",
@@ -113,39 +113,101 @@ def test_prime_example():
     # Extract the printed prime numbers from the output string
     prime_numbers = [int(n) for n in output.strip().split()]
 
-    # This should be a list of prime numbers up to 100
-    expected_primes = [
-        2,
-        3,
-        5,
-        7,
-        11,
-        13,
-        17,
-        19,
-        23,
-        29,
-        31,
-        37,
-        41,
-        43,
-        47,
-        53,
-        59,
-        61,
-        67,
-        71,
-        73,
-        79,
-        83,
-        89,
-        97,
-    ]
+    def primes_upto(limit):
+        if limit < 2:
+            return []
+        yield 2
+        is_prime = {n: True for n in range(3, limit + 1, 2)}
+        for n in range(3, int(limit**0.5) + 1, 2):
+            if is_prime[n]:
+                for i in range(n * n, limit + 1, n * 2):
+                    is_prime[i] = False
+        for n in range(3, limit + 1, 2):
+            if is_prime[n]:
+                yield n
+
+    # Example usage:
+    expected_primes = list(primes_upto(100))
+
     assert (
         prime_numbers == expected_primes
     ), "Prime number output does not match expected output"
 
 
-if __name__ == "__main__":
-    test_code_examples()
-    test_prime_example()
+def test_multiplication_table_program():
+    # Testing the multiplication table program
+    expression = Expression.from_program(
+        "v print i j * 1 i - 10 * 1 j - + v setv 11 1 j for 11 1 i for 100 v valloc prog3",
+        dispatch,
+    )
+
+    env = {}
+
+    # Capturing the printed output
+    f = io.StringIO()
+    with redirect_stdout(f):
+        expression.evaluate(env)
+
+    # Extract the printed output as a string
+    output = f.getvalue()
+
+    # Using eval to evaluate the expression and get a list
+    screen_output = eval(output)
+
+    # Compute expected screen output for comparison
+    expected_output = [i * j for i in range(1, 11) for j in range(1, 11)]
+
+    assert screen_output == expected_output, "Screen output is incorrect"
+
+    # Extract the array 'v' from 'env'
+    v = env.get("v")  # Replace with actual way to extract 'v' from 'env'
+
+    if v is None:
+        raise AssertionError("'v' not found in the environment after program execution")
+
+    assert v == expected_output, "Output is incorrect"
+
+
+def test_collatz():
+    # Expression for the Collatz conjecture program
+    collatz_expression = Expression.from_program(
+        "x print 1 3 x * + x setq 2 x / x setq 2 x % 0 = if prog2 1 x != while 50 x setq x alloc prog3",
+        dispatch,
+    )
+
+    # Capturing the printed output
+    f = io.StringIO()
+    with redirect_stdout(f):
+        collatz_expression.evaluate({})
+
+    # Extract the printed output as a string
+    output = f.getvalue()
+
+    # Extract the Collatz sequence from the output string
+    # collatz_sequence = [int(n) for n in output.strip().split()]
+    collatz_sequence = [int(float(n)) for n in output.strip().split()]
+
+    # Function to compute the expected Collatz sequence
+    def compute_collatz_sequence(start_value):
+        sequence = []
+        while start_value > 1:
+            if start_value % 2 == 0:
+                start_value //= 2
+            else:
+                start_value = 3 * start_value + 1
+            sequence.append(start_value)
+        return sequence
+
+    # Expected Collatz sequence for the starting value of 50
+    expected_sequence = compute_collatz_sequence(50)
+
+    assert (
+        collatz_sequence == expected_sequence
+    ), "Collatz sequence does not match expected sequence"
+
+
+# if __name__ == "__main__":
+#     test_code_examples()
+#     test_prime_example()
+#     # test_multiplication_table_program()
+#     # test_collatz()

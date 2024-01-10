@@ -17,6 +17,7 @@ if __name__ == "__main__":
         "+": Addition,
         "*": Multiplication,
         "-": Subtraction,
+        "/": Division,
         "%": Modulus,
         ">": Greater,
         ">=": GreaterEqual,

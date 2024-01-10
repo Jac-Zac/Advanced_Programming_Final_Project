@@ -81,6 +81,9 @@ class Variable(Expression):
         if self._name not in env:
             raise MissingVariableException(f"Missing variable: {self._name}")
 
+        # If we only wanted int we could do:
+        # return int(env[self._name])
+
         return env[self._name]
 
     def __str__(self) -> str:
