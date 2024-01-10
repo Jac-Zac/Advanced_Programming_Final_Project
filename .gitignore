@@ -3,5 +3,6 @@
 **/*.o
 **/.pgm
 **/main
-**/__pycache__ 
-**/.pytest_cache/
+**/mandelbrot
+**/*__pycache__ 
+**/*.pytest_cache/
