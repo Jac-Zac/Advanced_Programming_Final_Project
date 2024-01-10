@@ -86,6 +86,16 @@ def test_code_examples():
     assert env4["x"] == 783
 
 
+def primes_upto(limit):
+    if limit < 2:
+        return []
+    primes = [2]
+    for n in range(3, limit + 1, 2):
+        if all(n % i != 0 for i in range(3, int(n**0.5) + 1, 2)):
+            primes.append(n)
+    return primes
+
+
 def test_prime_example():
     # Prime number checker program
     prime_expression = Expression.from_program(
@@ -112,19 +122,6 @@ def test_prime_example():
 
     # Extract the printed prime numbers from the output string
     prime_numbers = [int(n) for n in output.strip().split()]
-
-    def primes_upto(limit):
-        if limit < 2:
-            return []
-        yield 2
-        is_prime = {n: True for n in range(3, limit + 1, 2)}
-        for n in range(3, int(limit**0.5) + 1, 2):
-            if is_prime[n]:
-                for i in range(n * n, limit + 1, n * 2):
-                    is_prime[i] = False
-        for n in range(3, limit + 1, 2):
-            if is_prime[n]:
-                yield n
 
     # Example usage:
     expected_primes = list(primes_upto(100))
@@ -168,6 +165,14 @@ def test_multiplication_table_program():
     assert v == expected_output, "Output is incorrect"
 
 
+def compute_collatz_sequence(start_value):
+    sequence = []
+    while start_value > 1:
+        start_value = start_value // 2 if start_value % 2 == 0 else 3 * start_value + 1
+        sequence.append(start_value)
+    return sequence
+
+
 def test_collatz():
     # Expression for the Collatz conjecture program
     collatz_expression = Expression.from_program(
@@ -184,21 +189,7 @@ def test_collatz():
     output = f.getvalue()
 
     # Extract the Collatz sequence from the output string
-    # collatz_sequence = [int(n) for n in output.strip().split()]
     collatz_sequence = [int(float(n)) for n in output.strip().split()]
-
-    # Function to compute the expected Collatz sequence
-    def compute_collatz_sequence(start_value):
-        sequence = []
-        while start_value > 1:
-            if start_value % 2 == 0:
-                start_value //= 2
-            else:
-                start_value = 3 * start_value + 1
-            sequence.append(start_value)
-        return sequence
-
-    # Expected Collatz sequence for the starting value of 50
     expected_sequence = compute_collatz_sequence(50)
 
     assert (
