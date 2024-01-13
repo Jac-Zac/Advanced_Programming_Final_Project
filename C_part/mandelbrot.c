@@ -54,13 +54,12 @@ int calculate_mandelbrot_pixel(float x0, float y0, const int max_iter) {
       }
 
       // I tried prefetching bu it didn't really help I believe the compiler
-      // already optimizes the hack out of this 0 for read, 3 for temporal
-      // locality. I uses Instruments for many measurements.
+      // already optimizes the hack out of this
 
-      // __builtin_prefetch(&old_position_real, 0, 3);
-      // __builtin_prefetch(&old_position_imag, 0, 3);
-      // __builtin_prefetch(&x, 0, 3);
-      // __builtin_prefetch(&y, 0, 3);
+      // __builtin_prefetch(&old_position_real);
+      // __builtin_prefetch(&old_position_imag);
+      // __builtin_prefetch(&x);
+      // __builtin_prefetch(&y);
       if (period % PERIOD == 0) {
         old_position_real = x;
         old_position_imag = y;
@@ -102,7 +101,8 @@ v4si calculate_mandelbrot_pixel(v4sf x0, v4sf y0, const int max_iter) {
   int i = 0;
   while (i < max_iter) {
     // Update mask: true (-1) for points within the escape radius
-    // Since the return is -1 for true values we simply flip make it positive
+    // Since the return is a bit vector of 1s we get -1 for true values we
+    // simply flip make it positive
     mask = -(v4si)((x2 + y2) < radius_squared);
 
     // Break only if all points have escaped

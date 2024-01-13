@@ -1,11 +1,10 @@
 # Jacopo Zacchinga SM3201293
 CC = gcc
-DEBUG ?= 0
 OPTIMIZATION = -O3 # Allow user to choose the optimization they want default is O3
 
 # Compiler flags
 CFLAGS = -fopenmp -std=c17 $(OPTIMIZATION)
-ifeq ($(DEBUG),1)
+ifdef DEBUG
 	CFLAGS += -g -Wall -Wextra -pedantic -fopt-info-missed -DDEBUG
 else
 	CFLAGS += -march=native
@@ -37,7 +36,7 @@ vectorized: mandelbrot
 # clean_all and clean
 .PHONY: clean
 clean:
-	rm -f *.o mandelbrot
+	rm -f *.o
 
 .PHONY: clean_all
 clean_all:
