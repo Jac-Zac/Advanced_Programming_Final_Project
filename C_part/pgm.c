@@ -84,7 +84,13 @@ void calculate_mandelbrot(netpbm *img_ptr, const int max_iter) {
 
       int mandelbrot_val = calculate_mandelbrot_pixel(real, imag, max_iter);
 
-      *pixel = MAX_COLOR * log((float)mandelbrot_val) / log_max_iter;
+      // It is cleaner if I do this
+      if (mandelbrot_val == max_iter) {
+        *pixel = MAX_COLOR;
+      } else {
+        *pixel = MAX_COLOR * log((float)mandelbrot_val) / log_max_iter;
+      }
+
       *pixel_symmetric = *pixel;
     }
   }
@@ -93,7 +99,8 @@ void calculate_mandelbrot(netpbm *img_ptr, const int max_iter) {
 // Number of float we can fit using SIMD instruction to vectorize the code
 #define NUM_PIXELS 4
 
-// Parallel computation using OpenMP
+// Parallel computation using OpenMP with dynamic scheduler since different
+// iteration might take different times
 #pragma omp parallel for schedule(dynamic)
   // Exploit the symmetry of the Mandelbrot set to only compute half of it
   for (int y = 0; y <= img_ptr->height / 2; y += NUM_PIXELS) {
@@ -124,7 +131,13 @@ void calculate_mandelbrot(netpbm *img_ptr, const int max_iter) {
 
       // Set the values for the different pixels
       for (int i = 0; i < NUM_PIXELS; i++) {
-        *pixel[i] = MAX_COLOR * (log((float)mandelbrot_val[i]) / log_max_iter);
+        // Adding also this check is better solution actually
+        if (mandelbrot_val[i] == max_iter) {
+          *pixel[i] = MAX_COLOR;
+        } else {
+          *pixel[i] =
+              MAX_COLOR * (log((float)mandelbrot_val[i]) / log_max_iter);
+        }
         *pixel_symmetric[i] = *pixel[i];
       }
     }
