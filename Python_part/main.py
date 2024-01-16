@@ -33,7 +33,8 @@ if __name__ == "__main__":
     }
 
     expression = Expression.from_program(
-        "nop x print prime if nop 0 0 != prime setq i x % 0 = if 1 x - 2 i for 0 0 = prime setq prime alloc prog4 100 2 x for",
+        # "nop x print prime if nop 0 0 != prime setq i x % 0 = if 1 x - 2 i for 0 0 = prime setq prime alloc prog4 100 2 x for",
+        "nop x print prime if nop false prime setq i x % 0 = if 1 x - 2 i for true prime setq prime alloc prog4 100 2 x for",
         dispatch,
     )
     env = {}

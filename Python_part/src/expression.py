@@ -49,6 +49,8 @@ class Expression(ABC):
                 expression_stack.push(operation_class(arguments))
 
             # If a variable or a constant deal with it separately
+            elif token == "true" or token == "false":
+                expression_stack.push(Bool(token))
             elif token.isalpha():
                 expression_stack.push(Variable(token))
             elif token.isdigit():
@@ -100,6 +102,21 @@ class Constant(Expression):
 
     def evaluate(self, env: Dict[str, Any]) -> int:
         return self._value
+
+    def __str__(self) -> str:
+        return f"{self._value}"
+
+
+class Bool(Expression):
+    """
+    Single Bool (one of the base expressions)
+    """
+
+    def __init__(self, value):
+        self._value = str(value)
+
+    def evaluate(self, env: Dict[str, Any]) -> bool:
+        return True if self._value == "true" else False
 
     def __str__(self) -> str:
         return f"{self._value}"
