@@ -105,8 +105,8 @@ v4si calculate_mandelbrot_pixel(v4sf x0, v4sf y0, const int max_iter) {
     // simply flip make it positive
     mask = -(v4si)((x2 + y2) < radius_squared);
 
-    // Break only if all points have escaped
-    if (mask[0] == 0 && mask[1] == 0 && mask[2] == 0 && mask[3] == 0) {
+    // Break only if all points have escaped and thus the value is not 0
+    if (!mask[0] && !mask[1] && !mask[2] && !mask[3]) {
       break;
     }
 
@@ -123,10 +123,10 @@ v4si calculate_mandelbrot_pixel(v4sf x0, v4sf y0, const int max_iter) {
     period_mask_imag = -(v4si)(old_position_imag == y);
 
     // Check if all elements in period_mask are set to 1 and thus all equal
-    if ((period_mask_real[0] == 1 && period_mask_real[1] == 1 &&
-         period_mask_real[2] == 1 && period_mask_real[3] == 1) &&
-        (period_mask_imag[0] == 1 && period_mask_imag[1] == 1 &&
-         period_mask_imag[2] == 1 && period_mask_imag[3] == 1)) {
+    if ((period_mask_real[0] && period_mask_real[1] && period_mask_real[2] &&
+         period_mask_real[3]) &&
+        (period_mask_imag[0] && period_mask_imag[1] && period_mask_imag[2] &&
+         period_mask_imag[3])) {
       return (v4si){max_iter, max_iter, max_iter, max_iter};
     }
 
