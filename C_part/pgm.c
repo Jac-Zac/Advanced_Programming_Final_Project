@@ -162,7 +162,10 @@ int close_image(netpbm_ptr img_ptr) {
   if (img_ptr == NULL) {
     return ERROR_FILE_CLOSE;
   }
+
+  // Unmapping all of the file
   munmap(img_ptr->data, img_ptr->size);
 
+  // Closing file
   return fclose(img_ptr->fd);
 }
