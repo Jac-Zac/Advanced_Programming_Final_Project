@@ -40,6 +40,24 @@ You can remove anything which is not relevant with `make clean` and `make clean_
 
     </details>
 
+  ##### Those are the possible error codes:
+
+  > That are defined inside [`pgm.h`](C_part/pgm.h)
+
+  ```c
+  SUCCESS = 0,
+  INVALID_ARGUMENTS = -1,
+  INVALID_FILE_EXTENSION = -2,
+  INVALID_MAX_ITER = -3,
+  INVALID_N_ROWS = -4,
+  ERROR_NULL_POINTER = -5,
+  ERROR_FILE_OPEN = -6,
+  ERROR_FILE_WRITE = -7,
+  ERROR_FILE_TRUNCATE = -8,
+  ERROR_MMAP = -9,
+  ERROR_FILE_CLOSE = -10
+  ```
+
 - ##### Implementation Details
 
   The program calculates the Mandelbrot set and outputs an image in the netpbm grayscale format.

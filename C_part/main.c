@@ -37,9 +37,9 @@ int main(int argc, char *argv[]) {
   const int max_iter = atoi(argv[2]);
   const int n_rows = atoi(argv[3]);
 
-  int validation_status = validate_inputs(argc, file_name, max_iter, n_rows);
-  if (validation_status != SUCCESS) {
-    return validation_status;
+  int error_status = validate_inputs(argc, file_name, max_iter, n_rows);
+  if (error_status != SUCCESS) {
+    return error_status;
   }
 
   double start = omp_get_wtime();
@@ -52,6 +52,7 @@ int main(int argc, char *argv[]) {
   }
 
   double ms = (end - start) * 1000;
+
 #ifdef DEBUG
 #ifdef GCC_EXTENSIONS
   printf(
