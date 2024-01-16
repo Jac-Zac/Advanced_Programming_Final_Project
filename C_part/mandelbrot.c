@@ -118,9 +118,8 @@ v4si calculate_mandelbrot_pixel(v4sf x0, v4sf y0, const int max_iter) {
     y2 = y * y;
 
     // Periodicity Check by explicitly telling the compiler those are v4si
-    // Similarly to before we need to get the opposite of the result
-    period_mask_real = -(v4si)(old_position_real == x);
-    period_mask_imag = -(v4si)(old_position_imag == y);
+    period_mask_real = (v4si)(old_position_real == x);
+    period_mask_imag = (v4si)(old_position_imag == y);
 
     // Check if all elements in period_mask are set to 1 and thus all equal
     if ((period_mask_real[0] && period_mask_real[1] && period_mask_real[2] &&
