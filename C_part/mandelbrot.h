@@ -10,7 +10,7 @@
 // bigger period
 // I actually thought it might work and then found it on this Wikipedia article
 // https://en.wikipedia.org/wiki/Plotting_algorithms_for_the_Mandelbrot_set#Periodicity_checking
-#define PERIOD 100
+#define PERIOD 100000
 
 // If GCC extensions are not used
 // We run the simple non vectorize version

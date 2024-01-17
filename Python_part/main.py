@@ -27,6 +27,7 @@ if __name__ == "__main__":
         "if": If,
         "while": While,
         "for": For,
+        "prog1": Prog1,
         "prog2": Prog2,
         "prog3": Prog3,
         "prog4": Prog4,

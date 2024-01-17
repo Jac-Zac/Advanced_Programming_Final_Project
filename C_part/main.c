@@ -34,6 +34,8 @@ int main(int argc, char *argv[]) {
   }
 
   const char *file_name = argv[1];
+
+  // Get the arguments as int not as strings
   const int max_iter = atoi(argv[2]);
   const int n_rows = atoi(argv[3]);
 
@@ -42,6 +44,7 @@ int main(int argc, char *argv[]) {
     return error_status;
   }
 
+  // Create the image and time the process
   double start = omp_get_wtime();
   int error = create_image(file_name, max_iter, n_rows);
   double end = omp_get_wtime();

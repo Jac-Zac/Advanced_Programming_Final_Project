@@ -20,6 +20,7 @@ int set_image_info(netpbm_ptr img_ptr, const char *file_name,
 
   int header_size =
       fprintf(img_ptr->fd, "P5\n%d %d\n255\n", img_ptr->width, img_ptr->height);
+
   if (header_size < 0) {
     fclose(img_ptr->fd);
     return ERROR_FILE_WRITE;
@@ -69,14 +70,22 @@ void calculate_mandelbrot(netpbm *img_ptr, const int max_iter) {
   float y_normalization = 2.0f / ((float)img_ptr->height - 1.0f);
   float x_normalization = 3.0f / ((float)img_ptr->width - 1.0f);
 
+  // Add a check for hight
+  // Check if the image height is odd
+  // bool isHeightOdd = (img_ptr->height % 2) != 0;
+  //
+  // // Compute up to the middle row if height is odd, otherwise compute half
+  // int limit = isHeightOdd ? (img_ptr->height / 2) : (img_ptr->height / 2 +
+  // 1);
+
 #ifndef GCC_EXTENSIONS
 #pragma omp parallel for schedule(dynamic)
   // Exploit the symmetry of the Mandelbrot set to only compute half of it
   for (int y = 0; y <= img_ptr->height / 2; y++) {
     // Compute the normalized coordinates
-    float imag = (y * y_normalization) - 1.0;
     for (int x = 0; x < img_ptr->width; x++) {
       float real = (x * x_normalization) - 2.0;
+      float imag = (y * y_normalization) - 1.0;
 
       // Compute the symmetric part together
       char *pixel = pixel_at(img_ptr, x, y);
@@ -91,9 +100,15 @@ void calculate_mandelbrot(netpbm *img_ptr, const int max_iter) {
         *pixel = MAX_COLOR * log((float)mandelbrot_val) / log_max_iter;
       }
 
+      // if (!isHeightOdd || y != img_ptr->height / 2) {
+      //   *pixel_symmetric = *pixel;
+      // }
+
       *pixel_symmetric = *pixel;
     }
   }
+
+  // If hight is odd compute the middle row separately
 
 #else
 // Number of float we can fit using SIMD instruction to vectorize the code
@@ -104,16 +119,16 @@ void calculate_mandelbrot(netpbm *img_ptr, const int max_iter) {
 #pragma omp parallel for schedule(dynamic)
   // Exploit the symmetry of the Mandelbrot set to only compute half of it
   for (int y = 0; y <= img_ptr->height / 2; y += NUM_PIXELS) {
-    // Initialize NUM_PIXELS with different y values in the outer loop to avoid
-    // unnecessary re computation
-    v4sf imag = {y * y_normalization - 1.0f, (y + 1) * y_normalization - 1.0f,
-                 (y + 2) * y_normalization - 1.0f,
-                 (y + 3) * y_normalization - 1.0f};
 
     for (int x = 0; x < img_ptr->width; x++) {
       float reals = x * x_normalization - 2.0;
       // Initialize NUM_PIXELS with the same x value
       v4sf real = (v4sf){reals, reals, reals, reals};
+      // Initialize NUM_PIXELS with different y values in the outer loop to
+      // avoid unnecessary re computation
+      v4sf imag = {y * y_normalization - 1.0f, (y + 1) * y_normalization - 1.0f,
+                   (y + 2) * y_normalization - 1.0f,
+                   (y + 3) * y_normalization - 1.0f};
 
       // Compute the symmetric part together
       char *pixel[NUM_PIXELS] = {

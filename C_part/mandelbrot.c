@@ -48,18 +48,21 @@ int calculate_mandelbrot_pixel(float x0, float y0, const int max_iter) {
       y_squared = y * y;
 
       // trade of memory for compute
-      if ((old_position_real == x && old_position_imag == y)) {
+      if (old_position_real == x && old_position_imag == y) {
         // set to max for the color plotting
         break;
       }
 
       // I tried prefetching bu it didn't really help I believe the compiler
-      // already optimizes the hack out of this
+      // already optimizes the hack out of this also the if fails a lot of time
+      // and thus it doesn't really help 3 Because we want to keep it in the
+      // chache 1 because write
+      // __builtin_prefetch(&old_position_real, 1, 3);
+      // __builtin_prefetch(&old_position_imag, 1, 3);
+      // // // 0 because read
+      // __builtin_prefetch(&x, 0, 3);
+      // __builtin_prefetch(&y, 0, 3);
 
-      // __builtin_prefetch(&old_position_real);
-      // __builtin_prefetch(&old_position_imag);
-      // __builtin_prefetch(&x);
-      // __builtin_prefetch(&y);
       if (period % PERIOD == 0) {
         old_position_real = x;
         old_position_imag = y;
@@ -89,6 +92,7 @@ v4si calculate_mandelbrot_pixel(v4sf x0, v4sf y0, const int max_iter) {
   // Initialization which implicitly does {0, 0, 0, 0} since we defined v4sf
   v4sf x = {0}, y = {0}, x2 = {0}, y2 = {0};
   v4sf old_position_real = {0}, old_position_imag = {0};
+  v4sf old_position_real_mask = {1.0f}, old_position_imag_mask = {1.0f};
 
   v4sf radius_squared = {RADIUS_SQUARED, RADIUS_SQUARED, RADIUS_SQUARED,
                          RADIUS_SQUARED};
@@ -128,6 +132,8 @@ v4si calculate_mandelbrot_pixel(v4sf x0, v4sf y0, const int max_iter) {
          period_mask_imag[3])) {
       return (v4si){max_iter, max_iter, max_iter, max_iter};
     }
+
+    // Think about doing the check for single value and get a mask like that
 
     // Possible branchless version a bit overkill no real performance benefits
     // but I should test it more
